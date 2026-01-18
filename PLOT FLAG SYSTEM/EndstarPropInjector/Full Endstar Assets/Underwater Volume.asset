@@ -1,0 +1,14 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {m_FileID: 0, m_PathID: 0, m_TargetClassID: 18}
+  m_PrefabInstance: {m_FileID: 0, m_PathID: 0, m_TargetClassID: 1001}
+  m_PrefabAsset: {m_FileID: 0, m_PathID: 0, m_TargetClassID: 1001480554}
+  m_GameObject: {m_FileID: 0, m_PathID: 0, m_TargetClassID: 1}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {m_FileID: 1, m_PathID: 4078, m_TargetClassID: 115}
+  m_Name: Underwater Volume
+  m_EditorClassIdentifier:

@@ -1,0 +1,99 @@
+﻿Endstar Engine Rule Block Cheat Sheet
+
+
+
+
+* Countdown Timer
+A timer that triggers actions after a set duration. Useful for timed events, challenges, or sequences.
+
+* Damager Block
+Inflicts damage to any entity (player or NPC) on trigger. Can be used for traps or hazardous zones.
+
+* Teleporter
+Instantly moves players or NPCs to a target location or level. Configurable for entry/exit points.
+
+* Health Modifier
+Increases or decreases the health of a target. Can heal or deal damage.
+
+* Random Multiple NPC Spawner
+Spawns a random selection of NPCs from a defined list. Ideal for variety in enemy encounters or setting NPC crowd volume in an area.
+
+* Item Granter
+Automatically gives an item to a player or NPC. Useful for tutorials, pickups, or mission rewards.
+
+* Item Quantity Checker
+Checks if a player has a specific quantity of an item. Often used in quests or progression gates.
+
+* Automatic Item Ensurer
+Ensures a player always has a specific item. Useful in persistent tool availability scenarios (e.g., resources or weapons).
+
+* Do Once per Context
+Executes connected rules only once per session or per player, depending on the context. Prevents repeated triggers.
+
+* Move to Camera
+Moves the game camera to a specific position or target. Often used during cutscenes or narrative sequences.
+
+* Simple Local Cutscene
+Plays a predefined animation or camera sequence locally for a player. Great for storytelling moments.
+
+* Sequence Rule
+Executes a set of connected actions in a specific order, one after another.
+
+* Healer Block
+Heals the player or NPC that activates it. Can be used as a healing zone in conjunction with trigger volume area or triggered ability.
+
+* Group Nodes
+Logical container for grouping multiple NPCs together, enabling bulk operations.
+
+* Interactable Volume
+Defines a space that players can interact with, often triggering rules when entered, exited, or interacted with. Once the player enters this defined zone, they can press the F key to activate the output trigger (Ex: clicking F to use camera prop to change focus to goal area)
+
+
+
+
+   * Trigger Volume 
+Defines a space that players can interact with, often triggering rules when entered or exited. Once the player enters this defined zone, the output event is automatically triggered without requiring any interaction.
+
+
+   * Launcher Node
+Launches the player or NPC into the air. Used for jump pads, or traversal mechanics.
+
+   * NPC Spawner
+Spawns a specific NPC at a location. Essential for combat or escort mission design.
+
+   * Player Downed Rule
+Triggers logic when a player is downed (not dead). Useful for revival mechanics or fail conditions.
+
+   * Player Has Item
+Checks whether the player has a specific item in their inventory.
+
+   * Player Input Modifier
+Modifies player controls (e.g., disable jump, lock movement). Good for puzzles or cinematic control.
+
+   * Dynamic Item Spawner
+Spawns an item dynamically during gameplay, based on player actions or rule conditions.
+
+   * Checkpoint Block
+Saves player progress and respawn points. Essential for long levels or boss fights.
+
+   * Dialogue Block
+Displays dialogue between characters. Often paired with cutscenes or quest logic. This requires the player to interact with the NPC for dialogue to trigger.
+
+
+      * Text Bubble Bark Block
+Displays dialogue from NPCs without requiring interaction from the player. The dialogue will pop up when conditions are met (e.g., When a player enters trigger volume area in front of NPC, the trigger volume triggers the text bubble bark block, initiation dialogue from NPC).
+
+      * Counter Rule
+Counts specific events (e.g., enemy kills, button presses) and triggers when a threshold is met.
+      * Portal
+Transfers players between levels or areas.
+
+      * Randomizer Rule Block
+Randomly picks one or more outputs to trigger. Adds unpredictability to level design.
+
+      * Filter Block
+You can add a filter to your game world for aesthetics. Use this in conjunction with Ambient Rule Block for better visuals.
+
+
+         * Ambient Block
+Change the ambient settings of the skybox and game world.

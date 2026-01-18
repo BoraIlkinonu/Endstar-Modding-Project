@@ -1,0 +1,15 @@
+{
+  "name": "Zayed Character Pack",
+  "version": "1.0.0",
+  "author": "Endstar Modding Community",
+  "description": "Replaces Felix with custom Zayed character (Pearl Diver model)",
+  "characters": [
+    {
+      "replaces": "Felix",
+      "newName": "Zayed",
+      "bundle": "characters/felix/bundle.bundle",
+      "portrait": "characters/felix/portrait.png",
+      "crc": "2057978164"
+    }
+  ]
+}

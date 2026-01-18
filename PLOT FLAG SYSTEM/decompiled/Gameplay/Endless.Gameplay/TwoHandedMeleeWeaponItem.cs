@@ -1,0 +1,19 @@
+namespace Endless.Gameplay;
+
+public class TwoHandedMeleeWeaponItem : MeleeWeaponItem
+{
+	protected override void __initializeVariables()
+	{
+		base.__initializeVariables();
+	}
+
+	protected override void __initializeRpcs()
+	{
+		base.__initializeRpcs();
+	}
+
+	protected internal override string __getTypeName()
+	{
+		return "TwoHandedMeleeWeaponItem";
+	}
+}

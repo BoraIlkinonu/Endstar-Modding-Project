@@ -1,0 +1,20 @@
+0 Animator Base
+ 0 PPtr<GameObject> m_GameObject
+  0 int m_FileID = 0
+  0 SInt64 m_PathID = 11875
+ 1 UInt8 m_Enabled = 1
+ 0 PPtr<Avatar> m_Avatar
+  0 int m_FileID = 0
+  0 SInt64 m_PathID = 1619
+ 0 PPtr<RuntimeAnimatorController> m_Controller
+  0 int m_FileID = 0
+  0 SInt64 m_PathID = 1620
+ 0 int m_CullingMode = 0
+ 0 int m_UpdateMode = 0
+ 0 bool m_ApplyRootMotion = false
+ 0 bool m_LinearVelocityBlending = false
+ 1 bool m_StabilizeFeet = false
+ 0 bool m_HasTransformHierarchy = true
+ 0 bool m_AllowConstantClipSamplingOptimization = true
+ 0 bool m_KeepAnimatorStateOnDisable = false
+ 1 bool m_WriteDefaultValuesOnDisable = false

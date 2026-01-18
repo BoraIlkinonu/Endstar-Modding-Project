@@ -1,0 +1,7 @@
+Plot Flags Code Block
+Has plot flags:  FLAG_A ... X   (As many as you can reasonably fit on 10 if you can)
+Output FLAG_X triggered:  When the flag is turned on it will activate another event
+Input FLAG_X set.    All plot flags are false by default, but will turn true when set.   You cannot turn them back false)  This is set by an event.
+Nice to Have:
+Change plot flag names for that code block.  Instead of FLAG_A a player could name this to HAS_BUCKET or whatever else thats human readable.  Each code block remembers it's own names.
+Current Plot Flag states - Have some text input (maybe a bark) that spits out what the current plot flags are set to.  Useful for debuugging.

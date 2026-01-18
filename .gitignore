@@ -1,0 +1,116 @@
+# Endstar Modding Project .gitignore
+
+# Build outputs
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.cache
+*.rsuser
+*.userprefs
+
+# Rider
+.idea/
+
+# NuGet
+*.nupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+
+# Windows reserved names (these cause issues)
+nul
+NUL
+
+# Video files (too large for repo)
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# Large binary files
+*.bundle
+*.unity3d
+*.unitypackage
+
+# Unity generated
+Library/
+Temp/
+*.csproj
+*.sln
+
+# Asset bundles (keep the source, not built bundles)
+# custom_props.bundle
+
+# IDE specific
+*.swp
+*.swo
+*~
+
+# OS generated
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.log
+
+# Claude Code temp files
+.claude/
+
+# AssetRipper exports (too large for repo)
+AssetRipper_export*/
+
+# Large binary folders (excluded - too large for GitHub)
+PLOT FLAG SYSTEM/ORIGINAL_GAME_BACKUPS/
+PLOT FLAG SYSTEM/Tools/
+PLOT FLAG SYSTEM/Female model/
+PLOT FLAG SYSTEM/Meshy_AI_Models/
+PLOT FLAG SYSTEM/Zayed_Character_Mod/*.blend
+PLOT FLAG SYSTEM/Zayed_Character_Mod/EndstarModPatcher.exe
+PLOT FLAG SYSTEM/Extracted_Props/*.zip
+*.ORIGINAL
+*.assets
+*.resS
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+
+# Keep important documentation
+!*.md
+!*.txt
+!*.html
+
+# Keep config files
+!*.json
+!*.xml
+!*.config

@@ -1,0 +1,75 @@
+﻿using System;
+using Endless.Gameplay;
+using Endless.Gameplay.LuaEnums;
+using Endless.Shared;
+using Endless.Shared.DataTypes;
+using TMPro;
+using Unity.Netcode;
+using UnityEngine;
+
+namespace __GEN
+{
+	// Token: 0x020005B9 RID: 1465
+	internal class NetworkVariableSerializationHelper
+	{
+		// Token: 0x060022FF RID: 8959 RVA: 0x000A0C18 File Offset: 0x0009EE18
+		[RuntimeInitializeOnLoadMethod]
+		internal static void InitializeSerialization()
+		{
+			NetworkVariableSerializationTypes.InitializeSerializer_ManagedINetworkSerializable<PropLibraryReference>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_ManagedIEquatable<PropLibraryReference>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedByMemcpy<InteractionAnimation>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedValueEquals<InteractionAnimation>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedByMemcpy<float>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedIEquatable<float>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedByMemcpy<bool>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedIEquatable<bool>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedINetworkSerializable<NetworkedNullableVector3>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedIEquatable<NetworkedNullableVector3>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedINetworkSerializable<InventorySlot>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedIEquatable<InventorySlot>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedINetworkSerializable<Inventory.EquipmentSlot>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedIEquatable<Inventory.EquipmentSlot>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedINetworkSerializable<RigidbodyState>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedValueEquals<RigidbodyState>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedINetworkSerializable<SerializableGuid>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedIEquatable<SerializableGuid>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedINetworkSerializable<PlayerDownedComponent.ToggleState>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedValueEquals<PlayerDownedComponent.ToggleState>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedByMemcpy<PlayerDownedComponent.DownedAnim>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedValueEquals<PlayerDownedComponent.DownedAnim>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedByMemcpy<InputSettings>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedValueEquals<InputSettings>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedByMemcpy<Vector3>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedIEquatable<Vector3>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedINetworkSerializable<NetworkObjectReference>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedIEquatable<NetworkObjectReference>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedINetworkSerializable<Item.NetState>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedValueEquals<Item.NetState>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedByMemcpy<AmbientSettings.Skybox>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedValueEquals<AmbientSettings.Skybox>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedINetworkSerializable<BouncePad.ToggleInfo>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedValueEquals<BouncePad.ToggleInfo>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedINetworkSerializable<BouncePad.HeightInfo>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedValueEquals<BouncePad.HeightInfo>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedINetworkSerializable<Door.DoorNetworkData>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedValueEquals<Door.DoorNetworkData>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedINetworkSerializable<PhysicsCubeController.StateChangeInfo>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedValueEquals<PhysicsCubeController.StateChangeInfo>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedINetworkSerializable<InstantPickupBase.NetState>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedValueEquals<InstantPickupBase.NetState>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedByMemcpy<DamageMode>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedValueEquals<DamageMode>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedByMemcpy<PhysicsMode>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedValueEquals<PhysicsMode>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedINetworkSerializable<Sentry.SentryState>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedValueEquals<Sentry.SentryState>();
+			NetworkVariableSerializationTypes.InitializeSerializer_ManagedINetworkSerializable<LocalizedString>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_ManagedIEquatable<LocalizedString>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedByMemcpy<Color>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedIEquatable<Color>();
+			NetworkVariableSerializationTypes.InitializeSerializer_UnmanagedByMemcpy<TextAlignmentOptions>();
+			NetworkVariableSerializationTypes.InitializeEqualityChecker_UnmanagedValueEquals<TextAlignmentOptions>();
+		}
+	}
+}

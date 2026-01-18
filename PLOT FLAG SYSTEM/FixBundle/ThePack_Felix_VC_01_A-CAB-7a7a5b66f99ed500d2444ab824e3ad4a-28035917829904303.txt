@@ -1,0 +1,388 @@
+0 Material Base
+ 1 string m_Name = "ThePack_Felix_VC_01_A"
+ 0 PPtr<Shader> m_Shader
+  0 int m_FileID = 0
+  0 SInt64 m_PathID = -5040100065003638389
+ 0 vector m_ValidKeywords
+  1 Array Array (1 items)
+   0 int size = 1
+   [0]
+    1 string data = "_ALPHATEST_ON"
+ 0 vector m_InvalidKeywords
+  1 Array Array (0 items)
+   0 int size = 0
+ 0 unsigned int m_LightmapFlags = 1
+ 0 bool m_EnableInstancingVariants = false
+ 1 bool m_DoubleSidedGI = false
+ 0 int m_CustomRenderQueue = 2450
+ 0 map stringTagMap
+  0 Array Array (1 items)
+   0 int size = 1
+   [0]
+    0 pair data
+     1 string first = "RenderType"
+     1 string second = "Opaque"
+ 0 vector disabledShaderPasses
+  1 Array Array (0 items)
+   0 int size = 0
+ 0 UnityPropertySheet m_SavedProperties
+  0 map m_TexEnvs
+   0 Array Array (9 items)
+    0 int size = 9
+    [0]
+     0 pair data
+      1 string first = "Texture2D_033410430c1e41f38cbe37cd7347362e"
+      0 UnityTexEnv second
+       0 PPtr<Texture> m_Texture
+        0 int m_FileID = 0
+        0 SInt64 m_PathID = 0
+       0 Vector2f m_Scale
+        0 float x = 1
+        0 float y = 1
+       0 Vector2f m_Offset
+        0 float x = 0
+        0 float y = 0
+    [1]
+     0 pair data
+      1 string first = "Texture2D_0ec0db81fb95430191ba9b122120a097"
+      0 UnityTexEnv second
+       0 PPtr<Texture> m_Texture
+        0 int m_FileID = 0
+        0 SInt64 m_PathID = 0
+       0 Vector2f m_Scale
+        0 float x = 1
+        0 float y = 1
+       0 Vector2f m_Offset
+        0 float x = 0
+        0 float y = 0
+    [2]
+     0 pair data
+      1 string first = "_Albedo"
+      0 UnityTexEnv second
+       0 PPtr<Texture> m_Texture
+        0 int m_FileID = 0
+        0 SInt64 m_PathID = 9159252731764735420
+       0 Vector2f m_Scale
+        0 float x = 1
+        0 float y = -1
+       0 Vector2f m_Offset
+        0 float x = 0
+        0 float y = 1
+    [3]
+     0 pair data
+      1 string first = "_Emissive_Map"
+      0 UnityTexEnv second
+       0 PPtr<Texture> m_Texture
+        0 int m_FileID = 0
+        0 SInt64 m_PathID = 0
+       0 Vector2f m_Scale
+        0 float x = 1
+        0 float y = 1
+       0 Vector2f m_Offset
+        0 float x = 0
+        0 float y = 0
+    [4]
+     0 pair data
+      1 string first = "_Height"
+      0 UnityTexEnv second
+       0 PPtr<Texture> m_Texture
+        0 int m_FileID = 0
+        0 SInt64 m_PathID = 0
+       0 Vector2f m_Scale
+        0 float x = 1
+        0 float y = 1
+       0 Vector2f m_Offset
+        0 float x = 0
+        0 float y = 0
+    [5]
+     0 pair data
+      1 string first = "_Pre_Integrated_Scattering"
+      0 UnityTexEnv second
+       0 PPtr<Texture> m_Texture
+        0 int m_FileID = 0
+        0 SInt64 m_PathID = -6483014196931935071
+       0 Vector2f m_Scale
+        0 float x = 1
+        0 float y = 1
+       0 Vector2f m_Offset
+        0 float x = 0
+        0 float y = 0
+    [6]
+     0 pair data
+      1 string first = "unity_Lightmaps"
+      0 UnityTexEnv second
+       0 PPtr<Texture> m_Texture
+        0 int m_FileID = 0
+        0 SInt64 m_PathID = 0
+       0 Vector2f m_Scale
+        0 float x = 1
+        0 float y = 1
+       0 Vector2f m_Offset
+        0 float x = 0
+        0 float y = 0
+    [7]
+     0 pair data
+      1 string first = "unity_LightmapsInd"
+      0 UnityTexEnv second
+       0 PPtr<Texture> m_Texture
+        0 int m_FileID = 0
+        0 SInt64 m_PathID = 0
+       0 Vector2f m_Scale
+        0 float x = 1
+        0 float y = 1
+       0 Vector2f m_Offset
+        0 float x = 0
+        0 float y = 0
+    [8]
+     0 pair data
+      1 string first = "unity_ShadowMasks"
+      0 UnityTexEnv second
+       0 PPtr<Texture> m_Texture
+        0 int m_FileID = 0
+        0 SInt64 m_PathID = 0
+       0 Vector2f m_Scale
+        0 float x = 1
+        0 float y = 1
+       0 Vector2f m_Offset
+        0 float x = 0
+        0 float y = 0
+  0 map m_Ints
+   0 Array Array (0 items)
+    0 int size = 0
+  0 map m_Floats
+   0 Array Array (45 items)
+    0 int size = 45
+    [0]
+     0 pair data
+      1 string first = "HURT_FLASH"
+      0 float second = 0
+    [1]
+     0 pair data
+      1 string first = "Vector1_195718c9f68f499782987983967ae661"
+      0 float second = 0
+    [2]
+     0 pair data
+      1 string first = "Vector1_6639e655f62c4bf0878a285950a9ad38"
+      0 float second = 0,01
+    [3]
+     0 pair data
+      1 string first = "Vector1_844a91d1120546378bc600c39ce4fc77"
+      0 float second = 0
+    [4]
+     0 pair data
+      1 string first = "_AlphaClip"
+      0 float second = 1
+    [5]
+     0 pair data
+      1 string first = "_AlphaToMask"
+      0 float second = 1
+    [6]
+     0 pair data
+      1 string first = "_Blend"
+      0 float second = 0
+    [7]
+     0 pair data
+      1 string first = "_BlendModePreserveSpecular"
+      0 float second = 1
+    [8]
+     0 pair data
+      1 string first = "_BumpScale"
+      0 float second = 1
+    [9]
+     0 pair data
+      1 string first = "_CastShadows"
+      0 float second = 1
+    [10]
+     0 pair data
+      1 string first = "_ClearCoatMask"
+      0 float second = 0
+    [11]
+     0 pair data
+      1 string first = "_ClearCoatSmoothness"
+      0 float second = 0
+    [12]
+     0 pair data
+      1 string first = "_Cull"
+      0 float second = 2
+    [13]
+     0 pair data
+      1 string first = "_Cutoff"
+      0 float second = 0,5
+    [14]
+     0 pair data
+      1 string first = "_DetailAlbedoMapScale"
+      0 float second = 1
+    [15]
+     0 pair data
+      1 string first = "_DetailNormalMapScale"
+      0 float second = 1
+    [16]
+     0 pair data
+      1 string first = "_DstBlend"
+      0 float second = 0
+    [17]
+     0 pair data
+      1 string first = "_DstBlendAlpha"
+      0 float second = 0
+    [18]
+     0 pair data
+      1 string first = "_EnvironmentReflections"
+      0 float second = 1
+    [19]
+     0 pair data
+      1 string first = "_GlossMapScale"
+      0 float second = 1
+    [20]
+     0 pair data
+      1 string first = "_Glossiness"
+      0 float second = 0,4472136
+    [21]
+     0 pair data
+      1 string first = "_GlossyReflections"
+      0 float second = 1
+    [22]
+     0 pair data
+      1 string first = "_Height_Intensity"
+      0 float second = 0
+    [23]
+     0 pair data
+      1 string first = "_Metallic"
+      0 float second = 0
+    [24]
+     0 pair data
+      1 string first = "_Mode"
+      0 float second = 0
+    [25]
+     0 pair data
+      1 string first = "_OcclusionStrength"
+      0 float second = 1
+    [26]
+     0 pair data
+      1 string first = "_PS_Add"
+      0 float second = 0,5
+    [27]
+     0 pair data
+      1 string first = "_PS_Multiply"
+      0 float second = 0,5
+    [28]
+     0 pair data
+      1 string first = "_Parallax"
+      0 float second = 0,02
+    [29]
+     0 pair data
+      1 string first = "_QueueControl"
+      0 float second = 0
+    [30]
+     0 pair data
+      1 string first = "_QueueOffset"
+      0 float second = 0
+    [31]
+     0 pair data
+      1 string first = "_ReceiveShadows"
+      0 float second = 1
+    [32]
+     0 pair data
+      1 string first = "_Rim_Intensity"
+      0 float second = 1
+    [33]
+     0 pair data
+      1 string first = "_Rim_Power"
+      0 float second = 5
+    [34]
+     0 pair data
+      1 string first = "_Smoothness"
+      0 float second = 0,4472136
+    [35]
+     0 pair data
+      1 string first = "_SmoothnessTextureChannel"
+      0 float second = 0
+    [36]
+     0 pair data
+      1 string first = "_SpecularHighlights"
+      0 float second = 1
+    [37]
+     0 pair data
+      1 string first = "_SrcBlend"
+      0 float second = 1
+    [38]
+     0 pair data
+      1 string first = "_SrcBlendAlpha"
+      0 float second = 1
+    [39]
+     0 pair data
+      1 string first = "_Surface"
+      0 float second = 0
+    [40]
+     0 pair data
+      1 string first = "_UVSec"
+      0 float second = 0
+    [41]
+     0 pair data
+      1 string first = "_WorkflowMode"
+      0 float second = 1
+    [42]
+     0 pair data
+      1 string first = "_ZTest"
+      0 float second = 4
+    [43]
+     0 pair data
+      1 string first = "_ZWrite"
+      0 float second = 1
+    [44]
+     0 pair data
+      1 string first = "_ZWriteControl"
+      0 float second = 0
+  0 map m_Colors
+   0 Array Array (6 items)
+    0 int size = 6
+    [0]
+     0 pair data
+      1 string first = "Albedo_Tint"
+      0 ColorRGBA second
+       0 float r = 1
+       0 float g = 1
+       0 float b = 1
+       0 float a = 0
+    [1]
+     0 pair data
+      1 string first = "Selection_Color"
+      0 ColorRGBA second
+       0 float r = 8
+       0 float g = 0
+       0 float b = 0
+       0 float a = 0
+    [2]
+     0 pair data
+      1 string first = "_BaseColor"
+      0 ColorRGBA second
+       0 float r = 0,8731682
+       0 float g = 0,8731682
+       0 float b = 0,8731682
+       0 float a = 1
+    [3]
+     0 pair data
+      1 string first = "_Color"
+      0 ColorRGBA second
+       0 float r = 0,8731682
+       0 float g = 0,8731682
+       0 float b = 0,8731682
+       0 float a = 1
+    [4]
+     0 pair data
+      1 string first = "_EmissionColor"
+      0 ColorRGBA second
+       0 float r = 0
+       0 float g = 0
+       0 float b = 0
+       0 float a = 1
+    [5]
+     0 pair data
+      1 string first = "_SpecColor"
+      0 ColorRGBA second
+       0 float r = 0,19999996
+       0 float g = 0,19999996
+       0 float b = 0,19999996
+       0 float a = 1
+ 0 vector m_BuildTextureStacks
+  1 Array Array (0 items)
+   0 int size = 0

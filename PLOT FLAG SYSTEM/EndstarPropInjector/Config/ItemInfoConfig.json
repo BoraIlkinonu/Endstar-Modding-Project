@@ -1,0 +1,12 @@
+{
+  "version": "1.0",
+  "items": [
+    {
+      "itemId": "pearl-basket-001",
+      "title": "Mystic Pearl",
+      "description": "A rare pearl found in the depths of the ocean. Ancient sailors believed these pearls held the power to calm storms. Collect them to unlock special rewards!",
+      "imagePath": "ItemImages/pearl_info.png",
+      "showOnFirstPickup": true
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100000
+GameObject:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {m_FileID: 0, m_PathID: 0, m_TargetClassID: 18}
+  m_PrefabInstance: {m_FileID: 0, m_PathID: 0, m_TargetClassID: 1001}
+  m_PrefabAsset: {m_FileID: 0, m_PathID: 0, m_TargetClassID: 1001480554}
+  m_Component:
+  - component: {m_FileID: 0, m_PathID: 22828, m_TargetClassID: 2}
+  - component: {m_FileID: 0, m_PathID: 50407, m_TargetClassID: 2}
+  - component: {m_FileID: 0, m_PathID: 23140, m_TargetClassID: 2}
+  m_Layer: 26
+  m_Name: Under Water Volume
+  m_TagString: Untagged
+  m_Icon: {m_FileID: 0, m_PathID: 0, m_TargetClassID: 28}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1

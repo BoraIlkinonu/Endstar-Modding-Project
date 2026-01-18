@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Plot Flag System - Documentation</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #eee;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 {
+            text-align: center;
+            color: #00d4ff;
+            font-size: 2.5em;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 40px;
+        }
+        h2 {
+            color: #ff6b6b;
+            border-bottom: 2px solid #ff6b6b;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #4ecdc4;
+            margin-top: 30px;
+        }
+        h4 {
+            color: #ffe66d;
+            margin-top: 20px;
+        }
+        .script-block {
+            background: linear-gradient(145deg, #2a2a4a, #1e1e3a);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 5px solid;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .manager { border-left-color: #ff6b6b; }
+        .checker { border-left-color: #4ecdc4; }
+        .quest { border-left-color: #ffe66d; }
+        .script-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .manager .script-title { color: #ff6b6b; }
+        .checker .script-title { color: #4ecdc4; }
+        .quest .script-title { color: #ffe66d; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: #1a1a2e;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th {
+            background: linear-gradient(135deg, #4a4a6a, #3a3a5a);
+            color: #fff;
+            padding: 12px;
+            text-align: left;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #333;
+        }
+        tr:hover { background: rgba(255,255,255,0.05); }
+        code {
+            background: #0a0a1a;
+            color: #00d4ff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+        }
+        pre {
+            background: #0a0a1a;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            border: 1px solid #333;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+        }
+        .diagram {
+            background: #0f0f1f;
+            padding: 25px;
+            border-radius: 15px;
+            font-family: 'Consolas', monospace;
+            white-space: pre;
+            overflow-x: auto;
+            border: 2px solid #333;
+            margin: 20px 0;
+        }
+        .example-box {
+            background: linear-gradient(145deg, #1f3a1f, #152815);
+            border: 2px solid #4ecdc4;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        .example-title {
+            color: #4ecdc4;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .step {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #ffe66d;
+        }
+        .step-num {
+            display: inline-block;
+            background: #ffe66d;
+            color: #000;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .event { color: #ff6b6b; }
+        .receiver { color: #4ecdc4; }
+        .message { color: #ffe66d; }
+        .arrow { color: #888; }
+        .highlight-green { background: rgba(78, 205, 196, 0.2); padding: 2px 5px; border-radius: 3px; }
+        .highlight-red { background: rgba(255, 107, 107, 0.2); padding: 2px 5px; border-radius: 3px; }
+        .highlight-yellow { background: rgba(255, 230, 109, 0.2); padding: 2px 5px; border-radius: 3px; }
+        .wiring-table td:first-child { color: #ff6b6b; font-weight: bold; }
+        .wiring-table td:nth-child(2) { color: #888; text-align: center; }
+        .wiring-table td:last-child { color: #4ecdc4; font-weight: bold; }
+        .stage-table tr:nth-child(1) td:first-child { color: #ff6b6b; }
+        .stage-table tr:nth-child(2) td:first-child { color: #888; }
+        .stage-table tr:nth-child(3) td:first-child { color: #4ecdc4; }
+        .stage-table tr:nth-child(4) td:first-child { color: #4ecdc4; }
+        .stage-table tr:nth-child(5) td:first-child { color: #ffe66d; }
+        .stage-table tr:nth-child(6) td:first-child { color: #ffe66d; }
+        .stage-table tr:nth-child(7) td:first-child { color: #4ecdc4; }
+        .toc {
+            background: linear-gradient(145deg, #2a2a4a, #1e1e3a);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        .toc h3 { margin-top: 0; color: #00d4ff; }
+        .toc ul { list-style: none; padding-left: 0; }
+        .toc li { padding: 8px 0; }
+        .toc a { color: #4ecdc4; text-decoration: none; }
+        .toc a:hover { color: #ffe66d; text-decoration: underline; }
+        .note {
+            background: rgba(255, 230, 109, 0.1);
+            border-left: 4px solid #ffe66d;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        .warning {
+            background: rgba(255, 107, 107, 0.1);
+            border-left: 4px solid #ff6b6b;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 10px 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Plot Flag System</h1>
+        <p class="subtitle">A complete flag and quest tracking system for Endstar</p>
+
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                <li><a href="#overview">1. System Overview</a></li>
+                <li><a href="#architecture">2. Architecture Diagram</a></li>
+                <li><a href="#scripts">3. The Three Scripts</a></li>
+                <li><a href="#example1">4. Example 1: Locked Door</a></li>
+                <li><a href="#example2">5. Example 2: Two-Quest System</a></li>
+                <li><a href="#reference">6. Quick Reference</a></li>
+            </ul>
+        </div>
+
+        <!-- SECTION 1: OVERVIEW -->
+        <h2 id="overview">1. System Overview</h2>
+        <p>The Plot Flag System consists of <strong>three Lua scripts</strong> that work together to track player progress, gate content, and display messages:</p>
+
+        <div class="script-block manager">
+            <div class="script-title">PlotFlagManager.lua</div>
+            <p><strong>Purpose:</strong> Central hub for storing flags and relaying display messages to the Billboard.</p>
+            <p><strong>Quantity:</strong> <span class="highlight-red">ONE per scene</span></p>
+            <p><strong>Role:</strong> Receives messages from all checkers and forwards them to the Billboard for display.</p>
+        </div>
+
+        <div class="script-block checker">
+            <div class="script-title">PlotFlagChecker.lua</div>
+            <p><strong>Purpose:</strong> Check and set boolean/int/float/string flags. Used for simple on/off states like "talked to guard" or "collected 5 coins".</p>
+            <p><strong>Quantity:</strong> <span class="highlight-green">MULTIPLE per scene</span> (one per flag you want to check/set)</p>
+            <p><strong>Role:</strong> Attached to triggers, doors, NPCs - anything that needs to check or change a flag.</p>
+        </div>
+
+        <div class="script-block quest">
+            <div class="script-title">QuestStageChecker.lua</div>
+            <p><strong>Purpose:</strong> Track multi-stage quests with stages from NOT_STARTED to COMPLETED.</p>
+            <p><strong>Quantity:</strong> <span class="highlight-yellow">MULTIPLE per scene</span> (one per quest interaction point)</p>
+            <p><strong>Role:</strong> Manage quest progression with stages: start, advance, complete, fail, reset.</p>
+        </div>
+
+        <!-- SECTION 2: ARCHITECTURE -->
+        <h2 id="architecture">2. Architecture Diagram</h2>
+        <div class="diagram">
+<span class="event">TRIGGERS / INTERACTIONS</span>
+        │
+        ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│   ┌─────────────────────┐       ┌─────────────────────┐        │
+│   │  <span class="checker">PlotFlagChecker</span>    │       │  <span class="quest">QuestStageChecker</span>  │        │
+│   │  FlagName: "Guard"  │       │  QuestName: "Main"  │        │
+│   │                     │       │                     │        │
+│   │  <span class="receiver">SetFlagTrue</span>       │       │  <span class="receiver">StartQuest</span>         │        │
+│   │  <span class="receiver">GateIfPassed</span>      │       │  <span class="receiver">AdvanceQuest</span>       │        │
+│   │  <span class="receiver">CheckFlag</span>         │       │  <span class="receiver">CheckStageAtLeast</span>  │        │
+│   └──────────┬──────────┘       └──────────┬──────────┘        │
+│              │                             │                   │
+│              │ <span class="event">OnSendDisplayMessage</span>       │                   │
+│              │                             │                   │
+│              └──────────────┬──────────────┘                   │
+│                             │                                  │
+│                             ▼                                  │
+│              ┌─────────────────────────────┐                   │
+│              │      <span class="manager">PlotFlagManager</span>       │                   │
+│              │                             │                   │
+│              │  <span class="receiver">ReceiveDisplayMessage</span>    │                   │
+│              │           │                 │                   │
+│              │           ▼                 │                   │
+│              │  <span class="event">OnDisplayUpdate</span>          │                   │
+│              └─────────────┬───────────────┘                   │
+│                            │                                   │
+└────────────────────────────┼───────────────────────────────────┘
+                             │
+                             ▼
+                  ┌─────────────────────┐
+                  │     <span class="message">Billboard</span>        │
+                  │   Set Raw Text      │
+                  └─────────────────────┘
+        </div>
+
+        <!-- SECTION 3: THE THREE SCRIPTS -->
+        <h2 id="scripts">3. The Three Scripts</h2>
+
+        <!-- PlotFlagManager -->
+        <h3>3.1 PlotFlagManager</h3>
+        <div class="script-block manager">
+            <h4>Inspector Fields</h4>
+            <table>
+                <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+                <tr><td><code>FlagName</code></td><td>String</td><td>Default flag name for this manager instance</td></tr>
+                <tr><td><code>UseGlobalScope</code></td><td>Bool</td><td>If true, flags are shared globally. If false, per-player.</td></tr>
+                <tr><td><code>DefaultBoolValue</code></td><td>Bool</td><td>Default value for unset boolean flags</td></tr>
+                <tr><td><code>DefaultIntValue</code></td><td>Int</td><td>Default value for unset integer flags</td></tr>
+                <tr><td><code>DefaultFloatValue</code></td><td>Float</td><td>Default value for unset float flags</td></tr>
+                <tr><td><code>DefaultStringValue</code></td><td>String</td><td>Default value for unset string flags</td></tr>
+            </table>
+
+            <h4>Key Receiver</h4>
+            <table>
+                <tr><th>Receiver</th><th>Description</th></tr>
+                <tr><td><code>ReceiveDisplayMessage</code></td><td>Receives messages from checkers and fires <code>OnDisplayUpdate</code></td></tr>
+            </table>
+
+            <h4>Key Event</h4>
+            <table>
+                <tr><th>Event</th><th>Description</th></tr>
+                <tr><td><code>OnDisplayUpdate</code></td><td>Wire this to Billboard's <code>Set Raw Text</code></td></tr>
+            </table>
+        </div>
+
+        <!-- PlotFlagChecker -->
+        <h3>3.2 PlotFlagChecker</h3>
+        <div class="script-block checker">
+            <h4>Inspector Fields</h4>
+            <table>
+                <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+                <tr><td><code>FlagName</code></td><td>String</td><td>Name of the flag to check/set (e.g., "TalkedToGuard")</td></tr>
+                <tr><td><code>FlagType</code></td><td>String</td><td>"Bool", "Int", "Float", or "String"</td></tr>
+                <tr><td><code>UseGlobalScope</code></td><td>Bool</td><td>Global or per-player storage</td></tr>
+                <tr><td><code>CheckOnStart</code></td><td>Bool</td><td>Automatically check when scene loads</td></tr>
+                <tr><td><code>CompareMode</code></td><td>String</td><td>"Equals", "NotEquals", "GreaterThan", "LessThan", "AtLeast", "AtMost"</td></tr>
+                <tr><td><code>CompareIntValue</code></td><td>Int</td><td>Value to compare against for Int flags</td></tr>
+                <tr><td><code>CompareFloatValue</code></td><td>Float</td><td>Value to compare against for Float flags</td></tr>
+                <tr><td><code>CompareStringValue</code></td><td>String</td><td>Value to compare against for String flags</td></tr>
+                <tr><td><code>TrueMessage</code></td><td>String</td><td>Message shown on success/pass</td></tr>
+                <tr><td><code>FailedMessage</code></td><td>String</td><td>Message shown on failure</td></tr>
+            </table>
+
+            <h4>Receivers (wire triggers to these)</h4>
+            <table>
+                <tr><th>Receiver</th><th>Description</th></tr>
+                <tr><td><code>SetFlagTrue</code></td><td>Sets the flag to true, shows <code>TrueMessage</code></td></tr>
+                <tr><td><code>SetFlagFalse</code></td><td>Sets the flag to false, shows <code>FailedMessage</code></td></tr>
+                <tr><td><code>CheckFlag</code></td><td>Checks the flag, fires OnPassed/OnFailed</td></tr>
+                <tr><td><code>GateIfPassed</code></td><td>Checks flag, fires <code>OnGateOpen</code> only if passed</td></tr>
+                <tr><td><code>GateIfFailed</code></td><td>Checks flag, fires <code>OnGateOpen</code> only if failed</td></tr>
+            </table>
+
+            <h4>Events (wire these to other objects)</h4>
+            <table>
+                <tr><th>Event</th><th>Description</th></tr>
+                <tr><td><code>OnPassed</code></td><td>Fired when check passes</td></tr>
+                <tr><td><code>OnFailed</code></td><td>Fired when check fails</td></tr>
+                <tr><td><code>OnGateOpen</code></td><td>Fired by GateIfPassed/GateIfFailed when condition met</td></tr>
+                <tr><td><code>OnFlagSet</code></td><td>Fired when flag value changes</td></tr>
+                <tr><td><code>OnSendDisplayMessage</code></td><td>Wire to PlotFlagManager's <code>ReceiveDisplayMessage</code></td></tr>
+            </table>
+        </div>
+
+        <!-- QuestStageChecker -->
+        <h3>3.3 QuestStageChecker</h3>
+        <div class="script-block quest">
+            <h4>Quest Stages</h4>
+            <table class="stage-table">
+                <tr><th>Stage</th><th>Value</th><th>Description</th></tr>
+                <tr><td>FAILED</td><td>-1</td><td>Quest failed</td></tr>
+                <tr><td>NOT_STARTED</td><td>0</td><td>Quest not yet begun</td></tr>
+                <tr><td>STARTED</td><td>1</td><td>Quest accepted/started</td></tr>
+                <tr><td>IN_PROGRESS</td><td>2</td><td>Working on objectives</td></tr>
+                <tr><td>OBJECTIVE_COMPLETE</td><td>3</td><td>Objectives done</td></tr>
+                <tr><td>READY_TO_TURN_IN</td><td>4</td><td>Ready to claim reward</td></tr>
+                <tr><td>COMPLETED</td><td>5</td><td>Quest finished</td></tr>
+            </table>
+
+            <h4>Inspector Fields</h4>
+            <table>
+                <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+                <tr><td><code>QuestName</code></td><td>String</td><td>Unique name for this quest (e.g., "MainQuest")</td></tr>
+                <tr><td><code>UseGlobalScope</code></td><td>Bool</td><td>Global or per-player storage</td></tr>
+                <tr><td><code>CheckOnStart</code></td><td>Bool</td><td>Automatically check when scene loads</td></tr>
+                <tr><td><code>RequiredStage</code></td><td>Int</td><td>Stage to compare against in checks</td></tr>
+                <tr><td><code>SetToStage</code></td><td>Int</td><td>Stage to set when using SetStage</td></tr>
+                <tr><td><code>TrueMessage</code></td><td>String</td><td>Shown on quest start/advance/complete</td></tr>
+                <tr><td><code>FailedMessage</code></td><td>String</td><td>Shown on check failure or quest fail</td></tr>
+                <tr><td><code>StartedMessage</code></td><td>String</td><td>Shown when CheckQuestStarted passes</td></tr>
+                <tr><td><code>CompletedMessage</code></td><td>String</td><td>Shown when CheckQuestCompleted passes</td></tr>
+                <tr><td><code>AdvancedMessage</code></td><td>String</td><td>Shown when CheckQuestInProgress passes</td></tr>
+                <tr><td><code>ResetMessage</code></td><td>String</td><td>Shown when quest is reset</td></tr>
+            </table>
+
+            <h4>Receivers</h4>
+            <table>
+                <tr><th>Receiver</th><th>Description</th></tr>
+                <tr><td><code>StartQuest</code></td><td>Sets stage to STARTED (if NOT_STARTED)</td></tr>
+                <tr><td><code>AdvanceQuest</code></td><td>Increments stage by 1</td></tr>
+                <tr><td><code>CompleteQuest</code></td><td>Sets stage to COMPLETED</td></tr>
+                <tr><td><code>FailQuest</code></td><td>Sets stage to FAILED</td></tr>
+                <tr><td><code>ResetQuest</code></td><td>Sets stage to NOT_STARTED</td></tr>
+                <tr><td><code>SetStage</code></td><td>Sets stage to <code>SetToStage</code> value</td></tr>
+                <tr><td><code>CheckStageEquals</code></td><td>Check if current stage equals <code>RequiredStage</code></td></tr>
+                <tr><td><code>CheckStageAtLeast</code></td><td>Check if current stage >= <code>RequiredStage</code></td></tr>
+                <tr><td><code>CheckQuestStarted</code></td><td>Check if quest has been started</td></tr>
+                <tr><td><code>CheckQuestCompleted</code></td><td>Check if quest is completed</td></tr>
+                <tr><td><code>CheckQuestFailed</code></td><td>Check if quest has failed</td></tr>
+                <tr><td><code>CheckQuestInProgress</code></td><td>Check if quest is in progress</td></tr>
+            </table>
+
+            <h4>Events</h4>
+            <table>
+                <tr><th>Event</th><th>Description</th></tr>
+                <tr><td><code>OnQuestStarted</code></td><td>Fired when quest starts</td></tr>
+                <tr><td><code>OnQuestCompleted</code></td><td>Fired when quest completes</td></tr>
+                <tr><td><code>OnQuestFailed</code></td><td>Fired when quest fails</td></tr>
+                <tr><td><code>OnQuestStageChanged</code></td><td>Fired when stage changes</td></tr>
+                <tr><td><code>OnQuestReset</code></td><td>Fired when quest is reset</td></tr>
+                <tr><td><code>OnCheckPassed</code></td><td>Fired when a check passes</td></tr>
+                <tr><td><code>OnCheckFailed</code></td><td>Fired when a check fails</td></tr>
+                <tr><td><code>OnSendDisplayMessage</code></td><td>Wire to PlotFlagManager's <code>ReceiveDisplayMessage</code></td></tr>
+            </table>
+        </div>
+
+        <!-- SECTION 4: EXAMPLE 1 -->
+        <h2 id="example1">4. Example 1: Locked Door (Talk to Guard First)</h2>
+
+        <div class="example-box">
+            <div class="example-title">Scenario</div>
+            <p>A door that only opens after the player talks to the guard. If the player tries to open the door without talking to the guard, they see "You must talk to the guard first!"</p>
+
+            <h4>Props Needed</h4>
+            <ul>
+                <li><strong>Guard NPC</strong> - with an InteractTrigger</li>
+                <li><strong>Door</strong> - with a CollisionTrigger or InteractTrigger</li>
+                <li><strong>PlotFlagManager</strong> - one instance in the scene</li>
+                <li><strong>PlotFlagChecker (Guard)</strong> - attached to guard interaction</li>
+                <li><strong>PlotFlagChecker (Door)</strong> - attached to door</li>
+                <li><strong>Billboard</strong> - to display messages</li>
+            </ul>
+
+            <h4>Step-by-Step Setup</h4>
+
+            <div class="step">
+                <span class="step-num">1</span>
+                <strong>Create PlotFlagManager</strong><br>
+                Add PlotFlagManager.lua to a prop. Set <code>UseGlobalScope = true</code>.
+            </div>
+
+            <div class="step">
+                <span class="step-num">2</span>
+                <strong>Create PlotFlagChecker for Guard</strong><br>
+                Add PlotFlagChecker.lua to the Guard NPC.<br>
+                <table>
+                    <tr><td><code>FlagName</code></td><td>"TalkedToGuard"</td></tr>
+                    <tr><td><code>FlagType</code></td><td>"Bool"</td></tr>
+                    <tr><td><code>UseGlobalScope</code></td><td>true</td></tr>
+                    <tr><td><code>TrueMessage</code></td><td>"The guard nods. You may pass."</td></tr>
+                    <tr><td><code>FailedMessage</code></td><td>""</td></tr>
+                </table>
+            </div>
+
+            <div class="step">
+                <span class="step-num">3</span>
+                <strong>Create PlotFlagChecker for Door</strong><br>
+                Add PlotFlagChecker.lua to the Door.<br>
+                <table>
+                    <tr><td><code>FlagName</code></td><td>"TalkedToGuard"</td></tr>
+                    <tr><td><code>FlagType</code></td><td>"Bool"</td></tr>
+                    <tr><td><code>UseGlobalScope</code></td><td>true</td></tr>
+                    <tr><td><code>TrueMessage</code></td><td>"Door unlocked!"</td></tr>
+                    <tr><td><code>FailedMessage</code></td><td>"You must talk to the guard first!"</td></tr>
+                </table>
+            </div>
+
+            <div class="step">
+                <span class="step-num">4</span>
+                <strong>Wire the Guard</strong><br>
+                <table class="wiring-table">
+                    <tr><td>Guard InteractTrigger OnTriggered</td><td>→</td><td>PlotFlagChecker (Guard) SetFlagTrue</td></tr>
+                    <tr><td>PlotFlagChecker (Guard) OnSendDisplayMessage</td><td>→</td><td>PlotFlagManager ReceiveDisplayMessage</td></tr>
+                </table>
+            </div>
+
+            <div class="step">
+                <span class="step-num">5</span>
+                <strong>Wire the Door</strong><br>
+                <table class="wiring-table">
+                    <tr><td>Door Trigger OnTriggered</td><td>→</td><td>PlotFlagChecker (Door) GateIfPassed</td></tr>
+                    <tr><td>PlotFlagChecker (Door) OnGateOpen</td><td>→</td><td>Door Open Animation</td></tr>
+                    <tr><td>PlotFlagChecker (Door) OnSendDisplayMessage</td><td>→</td><td>PlotFlagManager ReceiveDisplayMessage</td></tr>
+                </table>
+            </div>
+
+            <div class="step">
+                <span class="step-num">6</span>
+                <strong>Wire the Billboard</strong><br>
+                <table class="wiring-table">
+                    <tr><td>PlotFlagManager OnDisplayUpdate</td><td>→</td><td>Billboard Set Raw Text</td></tr>
+                </table>
+            </div>
+
+            <h4>Flow Diagram</h4>
+            <div class="diagram">
+<span class="message">PLAYER TRIES DOOR WITHOUT TALKING TO GUARD:</span>
+
+Door Trigger → PlotFlagChecker(Door).<span class="receiver">GateIfPassed</span>
+                        │
+                        ▼
+            Check "TalkedToGuard" = false
+                        │
+                        ▼
+            Fire <span class="event">OnFailed</span> + <span class="event">OnSendDisplayMessage</span>("You must talk to the guard first!")
+                        │
+                        ▼
+            PlotFlagManager.<span class="receiver">ReceiveDisplayMessage</span>
+                        │
+                        ▼
+            Fire <span class="event">OnDisplayUpdate</span> → Billboard shows <span class="message">"You must talk to the guard first!"</span>
+
+
+<span class="message">PLAYER TALKS TO GUARD:</span>
+
+Guard Trigger → PlotFlagChecker(Guard).<span class="receiver">SetFlagTrue</span>
+                        │
+                        ▼
+            Set "TalkedToGuard" = true
+                        │
+                        ▼
+            Fire <span class="event">OnSendDisplayMessage</span>("The guard nods. You may pass.")
+                        │
+                        ▼
+            Billboard shows <span class="message">"The guard nods. You may pass."</span>
+
+
+<span class="message">PLAYER TRIES DOOR AFTER TALKING TO GUARD:</span>
+
+Door Trigger → PlotFlagChecker(Door).<span class="receiver">GateIfPassed</span>
+                        │
+                        ▼
+            Check "TalkedToGuard" = true ✓
+                        │
+                        ▼
+            Fire <span class="event">OnGateOpen</span> → Door Opens!
+            Fire <span class="event">OnSendDisplayMessage</span>("Door unlocked!")
+                        │
+                        ▼
+            Billboard shows <span class="message">"Door unlocked!"</span>
+            </div>
+        </div>
+
+        <!-- SECTION 5: EXAMPLE 2 -->
+        <h2 id="example2">5. Example 2: Two-Quest System</h2>
+
+        <div class="example-box">
+            <div class="example-title">Scenario</div>
+            <p>Two quests that the player can complete:</p>
+            <ul>
+                <li><strong>Quest 1: "FindSword"</strong> - Player must find a sword in the dungeon</li>
+                <li><strong>Quest 2: "DefeatBoss"</strong> - Player must defeat the boss (requires sword)</li>
+            </ul>
+            <p>The system shows messages for both quest progression AND flag checks.</p>
+
+            <h4>Props Needed</h4>
+            <ul>
+                <li><strong>Quest Giver NPC</strong> - starts both quests</li>
+                <li><strong>Sword Pickup</strong> - collectible item in dungeon</li>
+                <li><strong>Boss Arena Entrance</strong> - gate that requires sword</li>
+                <li><strong>Boss</strong> - enemy to defeat</li>
+                <li><strong>PlotFlagManager</strong> - one instance</li>
+                <li><strong>PlotFlagChecker (Sword)</strong> - tracks sword collection</li>
+                <li><strong>PlotFlagChecker (BossGate)</strong> - gate check for sword</li>
+                <li><strong>QuestStageChecker (FindSword)</strong> - tracks first quest</li>
+                <li><strong>QuestStageChecker (DefeatBoss)</strong> - tracks second quest</li>
+                <li><strong>Billboard</strong> - displays all messages</li>
+            </ul>
+
+            <h4>Configuration</h4>
+
+            <h4 style="color: #4ecdc4;">PlotFlagChecker (Sword Pickup)</h4>
+            <table>
+                <tr><td><code>FlagName</code></td><td>"HasSword"</td></tr>
+                <tr><td><code>FlagType</code></td><td>"Bool"</td></tr>
+                <tr><td><code>TrueMessage</code></td><td>"You found the legendary sword!"</td></tr>
+            </table>
+
+            <h4 style="color: #4ecdc4;">PlotFlagChecker (Boss Gate)</h4>
+            <table>
+                <tr><td><code>FlagName</code></td><td>"HasSword"</td></tr>
+                <tr><td><code>FlagType</code></td><td>"Bool"</td></tr>
+                <tr><td><code>TrueMessage</code></td><td>"The gate recognizes the sword's power!"</td></tr>
+                <tr><td><code>FailedMessage</code></td><td>"You need a weapon to face the boss!"</td></tr>
+            </table>
+
+            <h4 style="color: #ffe66d;">QuestStageChecker (FindSword Quest)</h4>
+            <table>
+                <tr><td><code>QuestName</code></td><td>"FindSword"</td></tr>
+                <tr><td><code>TrueMessage</code></td><td>"Quest: Find the Sword - Updated!"</td></tr>
+                <tr><td><code>FailedMessage</code></td><td>"You haven't started the quest yet."</td></tr>
+                <tr><td><code>StartedMessage</code></td><td>"Quest Started: Find the Legendary Sword"</td></tr>
+                <tr><td><code>CompletedMessage</code></td><td>"Quest Complete: Find the Sword!"</td></tr>
+            </table>
+
+            <h4 style="color: #ffe66d;">QuestStageChecker (DefeatBoss Quest)</h4>
+            <table>
+                <tr><td><code>QuestName</code></td><td>"DefeatBoss"</td></tr>
+                <tr><td><code>RequiredStage</code></td><td>1 (STARTED)</td></tr>
+                <tr><td><code>TrueMessage</code></td><td>"Quest: Defeat the Boss - Updated!"</td></tr>
+                <tr><td><code>FailedMessage</code></td><td>"Complete 'Find the Sword' first!"</td></tr>
+                <tr><td><code>StartedMessage</code></td><td>"Quest Started: Defeat the Dark Boss"</td></tr>
+                <tr><td><code>CompletedMessage</code></td><td>"Quest Complete: The Boss is Defeated!"</td></tr>
+            </table>
+
+            <h4>Wiring Summary</h4>
+            <table class="wiring-table">
+                <tr><th>From</th><th></th><th>To</th></tr>
+                <tr><td>Quest Giver OnInteract</td><td>→</td><td>QuestStageChecker(FindSword) StartQuest</td></tr>
+                <tr><td>Sword Pickup OnCollect</td><td>→</td><td>PlotFlagChecker(Sword) SetFlagTrue</td></tr>
+                <tr><td>Sword Pickup OnCollect</td><td>→</td><td>QuestStageChecker(FindSword) CompleteQuest</td></tr>
+                <tr><td>QuestStageChecker(FindSword) OnQuestCompleted</td><td>→</td><td>QuestStageChecker(DefeatBoss) StartQuest</td></tr>
+                <tr><td>Boss Gate OnInteract</td><td>→</td><td>PlotFlagChecker(BossGate) GateIfPassed</td></tr>
+                <tr><td>PlotFlagChecker(BossGate) OnGateOpen</td><td>→</td><td>Gate Open Animation</td></tr>
+                <tr><td>Boss OnDefeated</td><td>→</td><td>QuestStageChecker(DefeatBoss) CompleteQuest</td></tr>
+                <tr><td colspan="3" style="background: #333; text-align: center;"><strong>ALL OnSendDisplayMessage → PlotFlagManager ReceiveDisplayMessage</strong></td></tr>
+                <tr><td>PlotFlagManager OnDisplayUpdate</td><td>→</td><td>Billboard Set Raw Text</td></tr>
+            </table>
+
+            <h4>Player Experience Flow</h4>
+            <div class="diagram">
+<span class="message">1. TALK TO QUEST GIVER</span>
+   └─→ Billboard: <span class="message">"Quest Started: Find the Legendary Sword"</span>
+
+<span class="message">2. TRY BOSS GATE (NO SWORD)</span>
+   └─→ Billboard: <span class="message">"You need a weapon to face the boss!"</span>
+
+<span class="message">3. FIND SWORD IN DUNGEON</span>
+   └─→ Billboard: <span class="message">"You found the legendary sword!"</span>
+   └─→ Billboard: <span class="message">"Quest Complete: Find the Sword!"</span>
+   └─→ Billboard: <span class="message">"Quest Started: Defeat the Dark Boss"</span>
+
+<span class="message">4. RETURN TO BOSS GATE (HAS SWORD)</span>
+   └─→ Billboard: <span class="message">"The gate recognizes the sword's power!"</span>
+   └─→ Gate Opens!
+
+<span class="message">5. DEFEAT THE BOSS</span>
+   └─→ Billboard: <span class="message">"Quest Complete: The Boss is Defeated!"</span>
+            </div>
+        </div>
+
+        <!-- SECTION 6: QUICK REFERENCE -->
+        <h2 id="reference">6. Quick Reference</h2>
+
+        <h3>Essential Wiring (ALWAYS DO THIS)</h3>
+        <div class="warning">
+            <strong>Every PlotFlagChecker and QuestStageChecker must have:</strong><br>
+            <code>OnSendDisplayMessage</code> → <code>PlotFlagManager.ReceiveDisplayMessage</code>
+        </div>
+
+        <div class="note">
+            <strong>PlotFlagManager must have:</strong><br>
+            <code>OnDisplayUpdate</code> → <code>Billboard.Set Raw Text</code>
+        </div>
+
+        <h3>Message Fields Quick Reference</h3>
+        <table>
+            <tr><th>Script</th><th>Field</th><th>When Shown</th></tr>
+            <tr><td rowspan="2">PlotFlagChecker</td><td><code>TrueMessage</code></td><td>SetFlagTrue, check passed</td></tr>
+            <tr><td><code>FailedMessage</code></td><td>SetFlagFalse, check failed</td></tr>
+            <tr><td rowspan="6">QuestStageChecker</td><td><code>TrueMessage</code></td><td>Quest started, advanced, stage checks passed</td></tr>
+            <tr><td><code>FailedMessage</code></td><td>Quest failed, check failed</td></tr>
+            <tr><td><code>StartedMessage</code></td><td>CheckQuestStarted passed</td></tr>
+            <tr><td><code>CompletedMessage</code></td><td>CheckQuestCompleted passed</td></tr>
+            <tr><td><code>AdvancedMessage</code></td><td>CheckQuestInProgress passed</td></tr>
+            <tr><td><code>ResetMessage</code></td><td>ResetQuest called</td></tr>
+        </table>
+
+        <h3>Common Receivers</h3>
+        <table>
+            <tr><th>To Do This</th><th>Call This Receiver</th></tr>
+            <tr><td>Set a flag to true</td><td><code>PlotFlagChecker.SetFlagTrue</code></td></tr>
+            <tr><td>Check a flag and open something</td><td><code>PlotFlagChecker.GateIfPassed</code></td></tr>
+            <tr><td>Start a quest</td><td><code>QuestStageChecker.StartQuest</code></td></tr>
+            <tr><td>Move quest forward one stage</td><td><code>QuestStageChecker.AdvanceQuest</code></td></tr>
+            <tr><td>Complete a quest</td><td><code>QuestStageChecker.CompleteQuest</code></td></tr>
+            <tr><td>Check if quest is at required stage</td><td><code>QuestStageChecker.CheckStageAtLeast</code></td></tr>
+        </table>
+
+        <div style="text-align: center; margin-top: 50px; color: #666;">
+            <p>Plot Flag System Documentation v1.0</p>
+            <p>For Endstar Game Engine</p>
+        </div>
+    </div>
+</body>
+</html>

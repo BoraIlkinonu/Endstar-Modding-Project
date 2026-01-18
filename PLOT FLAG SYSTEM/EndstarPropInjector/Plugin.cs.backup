@@ -1,0 +1,1491 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using BepInEx;
+using BepInEx.Logging;
+using HarmonyLib;
+using UnityEngine;
+
+namespace EndstarPropInjector
+{
+    [BepInPlugin("com.endstar.propinjector", "Endstar Prop Injector", "7.0.1")]
+    public class Plugin : BaseUnityPlugin
+    {
+        public static ManualLogSource Log;
+        public static Plugin Instance;
+        private Harmony _harmony;
+
+        // Custom prop registry
+        public static Dictionary<string, object> CustomBaseTypes = new Dictionary<string, object>();
+        public static Dictionary<string, object> CustomProps = new Dictionary<string, object>();
+
+        // Our custom GUID for the test prop
+        public static readonly string CustomPropGuid = "11111111-1111-1111-1111-111111111111";
+        public static readonly string CustomBaseTypeGuid = "22222222-2222-2222-2222-222222222222";
+
+        // AssetBundle loading
+        private static AssetBundle _customPropsBundle;
+        private static GameObject _loadedPrefab;
+        private static Sprite _loadedIcon;
+
+        // Cached types
+        private static Type _baseTypeDefinitionType;
+        private static Type _componentDefinitionType;
+        private static Type _propType;
+        private static Type _serializableGuidType;
+        private static Type _stageManagerType;
+        private static Type _abstractComponentListBaseType;
+        private static Type _endlessVisualsType;
+        private static Type _endlessPropType;
+        private static Type _propBasedToolType;
+        private static Type _propLibraryType;
+        private static Type _playerControllerType;
+        private static Type _depthPlaneType;
+        private static Type _appearanceAnimatorType;
+        private static Type _filterType;
+        private static Type _playerReferenceManagerType;
+        private static Type _netStateType;
+
+        // Custom prefab and definition
+        private static GameObject _customPrefab;
+        private static GameObject _visualPrefab;
+        private static object _customBaseTypeDefinition;
+
+        // ========== UNDERWATER SWIMMING STATE (v6.0.0 DIAGNOSTIC) ==========
+        public static bool IsPlayerUnderwater = false;
+        public static bool IsSwimmingActive = false;
+        public static float UnderwaterDepth = 0f;
+        public static float SwimmingVerticalSpeed = 5f;
+        public static float DepthPlaneY = float.MinValue;
+        public static float WaterSurfaceY = float.MinValue;
+        public static float WaterEntryY = float.MaxValue;
+        public static float SwimActivationDepth = 1.0f;
+
+        // Swimming bounds
+        public static float MaxSwimDepth = 10f;
+        public static float SurfaceStopOffset = 0.5f;
+        public static float WaterEntryBuffer = 0.5f;
+        public static float WaterExitBuffer = 1.0f;
+
+        // v6.0.0: Motor-based swimming (like ghost mode)
+        private static int _swimVerticalMotor = 0;
+        private static int _swimMotorFrames = 8;
+        private static int _swimMotorDegradeRate = 2;
+
+        // v6.0.0: Cached PlayerController instance
+        private static object _cachedPlayerController = null;
+        private static bool _swimLoggedOnce = false;
+
+        // v6.0.0: Cached field references for diagnostics
+        private static FieldInfo _currentStateField = null;
+        private static FieldInfo _totalForceField = null;
+        private static FieldInfo _calculatedMotionField = null;
+        private static FieldInfo _blockGravityField = null;
+        private static FieldInfo _framesSinceStableGroundField = null;
+        private static bool _fieldsInitialized = false;
+
+        // v6.0.0: Blur/Filter state
+        private static bool _blurReductionApplied = false;
+        private static Dictionary<object, float> _originalVolumeWeights = new Dictionary<object, float>();
+
+        // v6.0.0: Shader modification flag
+        private static bool _shaderAlreadyModified = false;
+
+        // v6.2.1: Swimming state tracking
+        private static bool _swimPhysicsLogged = false;
+        private static bool _wasSwimmingLastFrame = false;  // Track transition for exit handling
+        private static float _waterExitCooldown = 0f;       // Cooldown after exiting to prevent state bugs
+        private static float _lastExitTime = 0f;            // Time when last exited water
+
+        void Awake()
+        {
+            Instance = this;
+            Log = Logger;
+            Log.LogInfo("===========================================");
+            Log.LogInfo("[INJECTOR] Plugin v7.0.1 - GHOST MODE PATTERN");
+            Log.LogInfo("[INJECTOR] Key fix: Use CalculatedMotion.y (not TotalForce.y)");
+            Log.LogInfo("[INJECTOR] BlockGravity=true, TotalForce.y=0, CalculatedMotion.y=swimSpeed");
+            Log.LogInfo("[INJECTOR] This keeps ground detection working on water exit!");
+            Log.LogInfo("===========================================");
+
+            try
+            {
+                _harmony = new Harmony("com.endstar.propinjector");
+
+                // Cache types
+                CacheTypes();
+
+                // Initialize field references
+                InitializeFieldReferences();
+
+                // Apply patches - Prop Injection
+                PatchStageManager();
+                PatchEndlessPropBuildPrefab();
+                PatchSpawnPreview();
+                PatchFindAndManageChildRenderers();
+
+                // v6.0.0 DIAGNOSTIC: Swimming patches
+                PatchProcessFallOffStage();           // Disable death underwater
+                PatchProcessPhysicsNetFrame();        // v6.0.0: DIAGNOSTIC Postfix (logs only!)
+                PatchProcessJumpPrefix();             // Prefix for jump (uses reflection)
+                PatchAppearanceAnimator();            // Swimming animation via parameters
+                PatchDepthPlaneStart();               // Reduce shader blur
+                PatchFilterStartTransition();         // Disable Blurred filter
+
+                Log.LogInfo("[INJECTOR] All patches applied successfully");
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[INJECTOR] Failed to initialize: {ex}");
+            }
+        }
+
+        void Update()
+        {
+            if (IsSwimmingActive)
+            {
+                UpdateSwimMotor();
+
+                if (!_blurReductionApplied)
+                {
+                    TryReduceBlur();
+                }
+            }
+            else
+            {
+                _swimVerticalMotor = 0;
+
+                if (_blurReductionApplied)
+                {
+                    TryRestoreBlur();
+                }
+            }
+
+            if (!IsPlayerUnderwater && _swimLoggedOnce)
+            {
+                ResetSwimmingCaches();
+            }
+        }
+
+        private void UpdateSwimMotor()
+        {
+            float input = 0f;
+            // Q = up (positive), E = down (negative) - intuitive controls
+            if (Input.GetKey(KeyCode.Q)) input = 1f;
+            else if (Input.GetKey(KeyCode.E)) input = -1f;
+
+            _swimVerticalMotor = MotorFromInput(input, _swimVerticalMotor, _swimMotorFrames, _swimMotorDegradeRate);
+        }
+
+        private static int MotorFromInput(float input, int currentMotor, int maxFrames, int degradeRate)
+        {
+            if (input > 0f)
+            {
+                return Mathf.Min(currentMotor + 1, maxFrames);
+            }
+            else if (input < 0f)
+            {
+                return Mathf.Max(currentMotor - 1, -maxFrames);
+            }
+            else
+            {
+                if (currentMotor > 0)
+                    return Mathf.Max(0, currentMotor - degradeRate);
+                else if (currentMotor < 0)
+                    return Mathf.Min(0, currentMotor + degradeRate);
+                return 0;
+            }
+        }
+
+        private void ResetSwimmingCaches()
+        {
+            _cachedPlayerController = null;
+            _swimLoggedOnce = false;
+            _swimVerticalMotor = 0;
+            _swimPhysicsLogged = false;
+            _wasSwimmingLastFrame = false;
+            _waterExitCooldown = 0f;
+
+            if (_blurReductionApplied)
+            {
+                TryRestoreBlur();
+            }
+            _blurReductionApplied = false;
+
+            Log.LogInfo("[SWIM] Caches reset (exited water)");
+        }
+
+        /// <summary>
+        /// v6.2.1: Full state reset when exiting water - prevents re-entry bugs
+        /// </summary>
+        private static void FullSwimmingStateReset()
+        {
+            IsPlayerUnderwater = false;
+            IsSwimmingActive = false;
+            UnderwaterDepth = 0f;
+            WaterEntryY = float.MaxValue;
+            WaterSurfaceY = float.MinValue;
+            _swimVerticalMotor = 0;
+            _swimLoggedOnce = false;
+            _wasSwimmingLastFrame = false;
+            _lastExitTime = Time.time;
+            _waterExitCooldown = 0.5f;  // Half second cooldown before allowing new swim state
+
+            Log.LogInfo("[SWIM-RESET] Full swimming state reset performed");
+        }
+
+        private void CacheTypes()
+        {
+            _baseTypeDefinitionType = AccessTools.TypeByName("Endless.Gameplay.BaseTypeDefinition");
+            _componentDefinitionType = AccessTools.TypeByName("Endless.Gameplay.ComponentDefinition");
+            _propType = AccessTools.TypeByName("Endless.Props.Assets.Prop");
+            _serializableGuidType = AccessTools.TypeByName("Endless.Shared.DataTypes.SerializableGuid");
+            _stageManagerType = AccessTools.TypeByName("Endless.Gameplay.LevelEditing.Level.StageManager");
+            _endlessVisualsType = AccessTools.TypeByName("Endless.Gameplay.Scripting.EndlessVisuals");
+            _endlessPropType = AccessTools.TypeByName("Endless.Gameplay.Scripting.EndlessProp");
+            _propBasedToolType = AccessTools.TypeByName("Endless.Creator.LevelEditing.Runtime.PropBasedTool");
+            _propLibraryType = AccessTools.TypeByName("Endless.Gameplay.LevelEditing.PropLibrary");
+            _playerControllerType = AccessTools.TypeByName("Endless.Gameplay.PlayerController");
+            _depthPlaneType = AccessTools.TypeByName("Endless.Gameplay.DepthPlane");
+            _appearanceAnimatorType = AccessTools.TypeByName("Endless.Gameplay.AppearanceAnimator");
+            _filterType = AccessTools.TypeByName("Endless.Gameplay.Filter");
+            _playerReferenceManagerType = AccessTools.TypeByName("Endless.Gameplay.PlayerReferenceManager");
+            _netStateType = AccessTools.TypeByName("Endless.Gameplay.NetState");
+
+            var baseTypeListType = AccessTools.TypeByName("Endless.Gameplay.BaseTypeList");
+            if (baseTypeListType != null)
+            {
+                _abstractComponentListBaseType = baseTypeListType.BaseType;
+            }
+
+            Log.LogInfo($"[INJECTOR] Types cached:");
+            Log.LogInfo($"[INJECTOR]   PlayerController: {_playerControllerType != null}");
+            Log.LogInfo($"[INJECTOR]   NetState: {_netStateType != null}");
+            Log.LogInfo($"[INJECTOR]   DepthPlane: {_depthPlaneType != null}");
+        }
+
+        /// <summary>
+        /// v6.0.0: Initialize field references for diagnostic logging
+        /// </summary>
+        private void InitializeFieldReferences()
+        {
+            if (_playerControllerType == null || _netStateType == null) return;
+
+            _currentStateField = AccessTools.Field(_playerControllerType, "currentState");
+            if (_currentStateField != null)
+            {
+                var stateType = _currentStateField.FieldType;
+                _totalForceField = AccessTools.Field(stateType, "TotalForce");
+                _calculatedMotionField = AccessTools.Field(stateType, "CalculatedMotion");
+                _blockGravityField = AccessTools.Field(stateType, "BlockGravity");
+                _framesSinceStableGroundField = AccessTools.Field(stateType, "FramesSinceStableGround");
+            }
+
+            _fieldsInitialized = _currentStateField != null && _totalForceField != null;
+
+            Log.LogInfo($"[SWIM] Field references initialized:");
+            Log.LogInfo($"[SWIM]   currentState: {_currentStateField != null} (type: {_currentStateField?.FieldType?.Name ?? "null"})");
+            Log.LogInfo($"[SWIM]   TotalForce: {_totalForceField != null}");
+            Log.LogInfo($"[SWIM]   CalculatedMotion: {_calculatedMotionField != null}");
+            Log.LogInfo($"[SWIM]   BlockGravity: {_blockGravityField != null}");
+            Log.LogInfo($"[SWIM]   FramesSinceStableGround: {_framesSinceStableGroundField != null}");
+        }
+
+        // ========== SWIMMING PATCHES (v6.0.0 DIAGNOSTIC) ==========
+
+        private void PatchProcessFallOffStage()
+        {
+            if (_playerControllerType != null)
+            {
+                var method = AccessTools.Method(_playerControllerType, "ProcessFallOffStage_NetFrame");
+                if (method != null)
+                {
+                    var prefix = new HarmonyMethod(typeof(Plugin).GetMethod(nameof(ProcessFallOffStage_Prefix),
+                        BindingFlags.Public | BindingFlags.Static));
+                    _harmony.Patch(method, prefix: prefix);
+                    Log.LogInfo("[INJECTOR] Patched PlayerController.ProcessFallOffStage_NetFrame");
+                }
+            }
+        }
+
+        /// <summary>
+        /// v6.1.0: Patch ProcessPhysics_NetFrame with a POSTFIX
+        /// This is the KEY patch - runs AFTER physics are processed but BEFORE Move() is called
+        /// </summary>
+        private void PatchProcessPhysicsNetFrame()
+        {
+            if (_playerControllerType != null)
+            {
+                var method = AccessTools.Method(_playerControllerType, "ProcessPhysics_NetFrame");
+                if (method != null)
+                {
+                    var postfix = new HarmonyMethod(typeof(Plugin).GetMethod(nameof(ProcessPhysics_Postfix_Swimming),
+                        BindingFlags.Public | BindingFlags.Static));
+                    _harmony.Patch(method, postfix: postfix);
+                    Log.LogInfo("[INJECTOR] Patched PlayerController.ProcessPhysics_NetFrame (v6.1.0 Swimming Postfix)");
+                }
+                else
+                {
+                    Log.LogError("[INJECTOR] ProcessPhysics_NetFrame method not found!");
+                }
+            }
+        }
+
+        private void PatchProcessJumpPrefix()
+        {
+            if (_playerControllerType != null)
+            {
+                var method = AccessTools.Method(_playerControllerType, "ProcessJump_NetFrame",
+                    new Type[] { AccessTools.TypeByName("Endless.Gameplay.NetInput") });
+                if (method != null)
+                {
+                    var prefix = new HarmonyMethod(typeof(Plugin).GetMethod(nameof(ProcessJump_Prefix),
+                        BindingFlags.Public | BindingFlags.Static));
+                    _harmony.Patch(method, prefix: prefix);
+                    Log.LogInfo("[INJECTOR] Patched PlayerController.ProcessJump_NetFrame (prefix)");
+                }
+            }
+        }
+
+        private void PatchAppearanceAnimator()
+        {
+            if (_appearanceAnimatorType != null)
+            {
+                var method = AccessTools.Method(_appearanceAnimatorType, "SetAnimationState");
+                if (method != null)
+                {
+                    var prefix = new HarmonyMethod(typeof(Plugin).GetMethod(nameof(SetAnimationState_Prefix),
+                        BindingFlags.Public | BindingFlags.Static));
+                    _harmony.Patch(method, prefix: prefix);
+                    Log.LogInfo("[INJECTOR] Patched AppearanceAnimator.SetAnimationState");
+                }
+            }
+        }
+
+        private void PatchDepthPlaneStart()
+        {
+            if (_depthPlaneType != null)
+            {
+                var method = AccessTools.Method(_depthPlaneType, "Start");
+                if (method != null)
+                {
+                    var postfix = new HarmonyMethod(typeof(Plugin).GetMethod(nameof(DepthPlane_Start_Postfix),
+                        BindingFlags.Public | BindingFlags.Static));
+                    _harmony.Patch(method, postfix: postfix);
+                    Log.LogInfo("[INJECTOR] Patched DepthPlane.Start");
+                }
+            }
+        }
+
+        private void PatchFilterStartTransition()
+        {
+            if (_filterType != null)
+            {
+                var method = AccessTools.Method(_filterType, "StartTransition");
+                if (method != null)
+                {
+                    var prefix = new HarmonyMethod(typeof(Plugin).GetMethod(nameof(StartTransition_Prefix),
+                        BindingFlags.Public | BindingFlags.Static));
+                    _harmony.Patch(method, prefix: prefix);
+                    Log.LogInfo("[INJECTOR] Patched Filter.StartTransition");
+                }
+            }
+        }
+
+        // ========== v6.0.0 DIAGNOSTIC PATCH METHODS ==========
+
+        private static object _cachedStageManager = null;
+        private static PropertyInfo _cachedActiveStageProperty = null;
+        private static PropertyInfo _cachedFallOffHeightProperty = null;
+        private static bool _cacheInitialized = false;
+
+        /// <summary>
+        /// v7.0.1: ProcessPhysics_NetFrame POSTFIX - GHOST MODE PATTERN
+        ///
+        /// KEY INSIGHT: Ground detection (line 715) is SKIPPED when TotalForce.y + CalculatedMotion.y >= 1
+        /// Previous versions set TotalForce.y positive, which broke ground detection on exit!
+        ///
+        /// THE FIX (copying ghost mode):
+        /// 1. BlockGravity = true (prevents gravity from being added)
+        /// 2. TotalForce.y = 0 (keeps ground detection threshold low)
+        /// 3. CalculatedMotion.y = swimSpeed (controlled movement like ghost mode)
+        /// </summary>
+        public static void ProcessPhysics_Postfix_Swimming(object __instance)
+        {
+            try
+            {
+                // ===== STEP 1: GET PLAYER POSITION =====
+                var transform = (__instance as MonoBehaviour)?.transform;
+                if (transform == null) return;
+                float playerY = transform.position.y;
+
+                // ===== STEP 2: POSITION SAFETY CHECK =====
+                // If above water surface, DO NOTHING - let normal gravity work
+                if (WaterSurfaceY == float.MinValue)
+                {
+                    return;  // Water surface not known yet
+                }
+
+                if (playerY >= WaterSurfaceY)
+                {
+                    // Player is ABOVE water - no swimming physics
+                    if (IsSwimmingActive)
+                    {
+                        Log.LogInfo($"[SWIM-EXIT] Player Y={playerY:F2} >= surface {WaterSurfaceY:F2} - normal physics");
+                        IsSwimmingActive = false;
+                        _swimVerticalMotor = 0;
+                    }
+                    return;  // Normal gravity will apply
+                }
+
+                // ===== STEP 3: NOT SWIMMING YET =====
+                if (!IsSwimmingActive)
+                {
+                    return;  // Still sinking to activation depth
+                }
+
+                // ===== STEP 4: CACHE FIELD REFERENCES =====
+                if (_currentStateField == null)
+                {
+                    _currentStateField = __instance.GetType().GetField("currentState",
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                }
+                if (_currentStateField == null) return;
+
+                object boxedState = _currentStateField.GetValue(__instance);
+                if (boxedState == null) return;
+
+                // Cache all needed fields
+                if (_blockGravityField == null)
+                {
+                    _blockGravityField = boxedState.GetType().GetField("BlockGravity",
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                }
+                if (_totalForceField == null)
+                {
+                    _totalForceField = boxedState.GetType().GetField("TotalForce",
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                }
+                if (_calculatedMotionField == null)
+                {
+                    _calculatedMotionField = boxedState.GetType().GetField("CalculatedMotion",
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                }
+
+                if (_blockGravityField == null || _totalForceField == null || _calculatedMotionField == null)
+                {
+                    Log.LogError("[SWIM] Missing required fields!");
+                    return;
+                }
+
+                // ===== STEP 5: CALCULATE SWIMMING =====
+                float maxHeight = WaterSurfaceY - SurfaceStopOffset;  // Surface ceiling (waist above water)
+                float minHeight = WaterSurfaceY - MaxSwimDepth;       // Max depth (10 units)
+
+                float swimSpeed = SwimmingVerticalSpeed * ((float)_swimVerticalMotor / (float)_swimMotorFrames);
+
+                // Bounds enforcement with bounce feedback at ceiling
+                if (playerY >= maxHeight)
+                {
+                    if (swimSpeed > 0f)
+                    {
+                        // Trying to go up at ceiling - small bounce feedback
+                        swimSpeed = -0.5f;
+                    }
+                    else if (swimSpeed == 0f)
+                    {
+                        // No input at ceiling - float in place
+                        swimSpeed = 0f;
+                    }
+                    // Negative swimSpeed (going down) is allowed
+                }
+                else if (playerY <= minHeight)
+                {
+                    if (swimSpeed < 0f)
+                    {
+                        // At max depth - can't go deeper
+                        swimSpeed = 0f;
+                    }
+                }
+
+                // ===== STEP 6: APPLY GHOST MODE PATTERN =====
+
+                // 1. BlockGravity = true (prevents gravity accumulation in ProcessPhysics_NetFrame)
+                _blockGravityField.SetValue(boxedState, true);
+
+                // 2. TotalForce.y = 0 (keeps combined velocity low for ground detection)
+                Vector3 totalForce = (Vector3)_totalForceField.GetValue(boxedState);
+                totalForce.y = 0f;
+                _totalForceField.SetValue(boxedState, totalForce);
+
+                // 3. CalculatedMotion.y = swimSpeed (controlled movement like ghost mode)
+                Vector3 calcMotion = (Vector3)_calculatedMotionField.GetValue(boxedState);
+                calcMotion.y = swimSpeed;
+                _calculatedMotionField.SetValue(boxedState, calcMotion);
+
+                // Write the modified state back
+                _currentStateField.SetValue(__instance, boxedState);
+
+                // Log once
+                if (!_swimLoggedOnce)
+                {
+                    Log.LogInfo($"[SWIM] v7.0.1 Ghost mode pattern active");
+                    Log.LogInfo($"[SWIM] Surface={WaterSurfaceY:F2}, Ceiling={maxHeight:F2}, Floor={minHeight:F2}");
+                    Log.LogInfo($"[SWIM] Controls: Q=up, E=down, Space=jump at surface");
+                    _swimLoggedOnce = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[SWIM] Physics error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Prefix: Skip death when underwater
+        /// v6.2.1: Added full state reset on exit and cooldown
+        /// </summary>
+        public static bool ProcessFallOffStage_Prefix(object __instance)
+        {
+            try
+            {
+                var transform = (__instance as MonoBehaviour)?.transform;
+                if (transform == null) return true;
+
+                float playerY = transform.position.y;
+
+                // Cache PlayerController instance
+                _cachedPlayerController = __instance;
+
+                if (!_cacheInitialized)
+                {
+                    var stageManagerType = AccessTools.TypeByName("Endless.Gameplay.LevelEditing.Level.StageManager");
+                    if (stageManagerType == null) return true;
+
+                    var instanceProp = stageManagerType.GetProperty("Instance",
+                        BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+                    if (instanceProp == null)
+                    {
+                        var baseType = stageManagerType.BaseType;
+                        while (baseType != null && instanceProp == null)
+                        {
+                            instanceProp = baseType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+                            baseType = baseType.BaseType;
+                        }
+                    }
+                    if (instanceProp == null) return true;
+
+                    _cachedStageManager = instanceProp.GetValue(null);
+                    _cachedActiveStageProperty = stageManagerType.GetProperty("ActiveStage");
+                    _cacheInitialized = true;
+                    Log.LogInfo("[SWIM] StageManager cache initialized");
+                }
+
+                if (_cachedStageManager == null || _cachedActiveStageProperty == null) return true;
+
+                var activeStage = _cachedActiveStageProperty.GetValue(_cachedStageManager);
+                if (activeStage == null) return true;
+
+                if (_cachedFallOffHeightProperty == null)
+                {
+                    _cachedFallOffHeightProperty = activeStage.GetType().GetProperty("StageFallOffHeight");
+                }
+                if (_cachedFallOffHeightProperty == null) return true;
+
+                float fallOffHeight = (float)_cachedFallOffHeightProperty.GetValue(activeStage);
+                float underwaterThreshold = fallOffHeight + 2f;
+
+                // v6.2.1: Check cooldown - during cooldown, don't process swimming state changes
+                if (_waterExitCooldown > 0f)
+                {
+                    _waterExitCooldown -= Time.deltaTime;
+                    if (_waterExitCooldown > 0f)
+                    {
+                        // Still in cooldown - allow normal physics, no swimming
+                        return true;  // Let normal death check run (player is above water during cooldown)
+                    }
+                }
+
+                bool wasUnderwater = IsPlayerUnderwater;
+                bool wasSwimmingActive = IsSwimmingActive;
+
+                // v7.0.1 FIX: When already underwater, use stored WaterSurfaceY (not dynamic threshold)
+                // The dynamic underwaterThreshold can change when stage reloads, causing false exits
+                float currentWaterSurface = wasUnderwater ? WaterSurfaceY : underwaterThreshold;
+                bool nowUnderwater = playerY < currentWaterSurface;
+
+                DepthPlaneY = fallOffHeight;
+
+                // ===== v6.2.1: State Transitions with Full Reset =====
+
+                // EXITING WATER (was underwater, now above)
+                if (!nowUnderwater && wasUnderwater)
+                {
+                    Log.LogInfo($"[SWIM-EXIT] Exiting water at Y={playerY:F2} (surface={currentWaterSurface:F2})");
+                    Log.LogInfo($"[SWIM-EXIT] Previous state: underwater={wasUnderwater}, swimming={wasSwimmingActive}");
+
+                    // FULL STATE RESET on exit
+                    FullSwimmingStateReset();
+
+                    return true;  // Allow normal ground physics
+                }
+
+                // ENTERING WATER (was above, now underwater)
+                if (nowUnderwater && !wasUnderwater)
+                {
+                    // Only allow entry if cooldown has passed
+                    if (Time.time - _lastExitTime < 0.3f)
+                    {
+                        Log.LogInfo($"[SWIM] Entry blocked - cooldown active ({Time.time - _lastExitTime:F2}s since exit)");
+                        return true;
+                    }
+
+                    IsPlayerUnderwater = true;
+                    WaterEntryY = playerY;
+                    WaterSurfaceY = underwaterThreshold;
+                    UnderwaterDepth = underwaterThreshold - playerY;
+                    IsSwimmingActive = false;
+                    Log.LogInfo($"[SWIM] Entered water at Y={playerY:F2}, surface={underwaterThreshold:F2}");
+                    return false;  // Skip death check
+                }
+
+                // UNDERWATER - check for swimming activation
+                if (nowUnderwater)
+                {
+                    IsPlayerUnderwater = true;
+                    UnderwaterDepth = underwaterThreshold - playerY;
+
+                    if (!IsSwimmingActive)
+                    {
+                        float depthBelowEntry = WaterEntryY - playerY;
+                        if (depthBelowEntry >= SwimActivationDepth)
+                        {
+                            IsSwimmingActive = true;
+                            _swimLoggedOnce = false;
+                            _wasSwimmingLastFrame = false;  // Fresh start
+                            Log.LogInfo($"[SWIM] Swimming ACTIVATED at Y={playerY:F2} (fell {depthBelowEntry:F2} units)");
+                        }
+                    }
+                    else
+                    {
+                        // Swimming active - check if we should deactivate (popped above surface)
+                        float exitThreshold = WaterSurfaceY + WaterExitBuffer;
+                        if (playerY > exitThreshold)
+                        {
+                            Log.LogInfo($"[SWIM] Above exit threshold ({playerY:F2} > {exitThreshold:F2}) - full reset");
+                            FullSwimmingStateReset();
+                            return true;
+                        }
+                    }
+
+                    return false;  // Skip death check when underwater
+                }
+
+                // NOT UNDERWATER
+                IsPlayerUnderwater = false;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[SWIM] ProcessFallOffStage error: {ex.Message}");
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// v6.0.0: Reset FramesSinceStableGround when near water surface (for jumping out)
+        /// </summary>
+        public static void ProcessJump_Prefix(object __instance)
+        {
+            try
+            {
+                if (!IsSwimmingActive) return;
+                if (!_fieldsInitialized || _currentStateField == null) return;
+
+                var transform = (__instance as MonoBehaviour)?.transform;
+                if (transform == null) return;
+
+                float playerY = transform.position.y;
+                float surfaceY = WaterSurfaceY;
+
+                // Only enable jump when within 1 unit of surface
+                if (playerY < surfaceY - 1.0f) return;
+
+                if (_framesSinceStableGroundField == null) return;
+
+                // Get boxed state
+                object boxedState = _currentStateField.GetValue(__instance);
+                if (boxedState == null) return;
+
+                // Reset FramesSinceStableGround to 0 (enables coyote time jump)
+                _framesSinceStableGroundField.SetValue(boxedState, 0);
+
+                // Write back
+                _currentStateField.SetValue(__instance, boxedState);
+
+                if (!_swimLoggedOnce)
+                {
+                    Log.LogInfo("[SWIM-JUMP] Near surface - FramesSinceStableGround reset for coyote time jump");
+                }
+            }
+            catch (Exception)
+            {
+                // Silent
+            }
+        }
+
+        /// <summary>
+        /// v6.0.0: Animation parameter manipulation for horizontal swimming pose
+        /// </summary>
+        public static void SetAnimationState_Prefix(
+            object __instance,
+            ref float rotation,
+            ref bool moving,
+            ref bool walking,
+            ref bool grounded,
+            ref float slopeAngle,
+            ref float airTime,
+            ref float fallTime,
+            ref Vector2 worldVelocity,
+            ref float velX,
+            ref float velY,
+            ref float velZ,
+            ref float angularVelocity,
+            ref float horizontalVelMagnitude,
+            ref string interactorToggleString,
+            ref int comboBookmark,
+            ref bool ghostmode,
+            ref bool ads,
+            ref float playerAngleDot,
+            ref Vector3 aimPoint,
+            ref bool useIK)
+        {
+            try
+            {
+                if (!IsSwimmingActive) return;
+
+                // Manipulate parameters for horizontal pose
+                grounded = false;
+                airTime = 0.3f;
+                fallTime = 0f;
+                velY = 0f;
+                walking = false;
+                moving = false;
+            }
+            catch (Exception)
+            {
+                // Silent
+            }
+        }
+
+        /// <summary>
+        /// v6.0.0: Reduce shader blur on Ocean_Plane
+        /// </summary>
+        public static void DepthPlane_Start_Postfix(object __instance)
+        {
+            try
+            {
+                if (_shaderAlreadyModified)
+                {
+                    Log.LogInfo("[SHADER] Already modified this session, skipping");
+                    return;
+                }
+
+                Log.LogInfo("[SHADER] DepthPlane.Start - Modifying Ocean_Plane shader");
+
+                var depthPlane = __instance as MonoBehaviour;
+                if (depthPlane == null) return;
+
+                var oceanPlane = FindChildRecursive(depthPlane.transform, "Ocean_Plane");
+                if (oceanPlane == null)
+                {
+                    Log.LogWarning("[SHADER] Could not find Ocean_Plane child");
+                    return;
+                }
+
+                var renderer = oceanPlane.GetComponent<MeshRenderer>();
+                if (renderer == null)
+                {
+                    Log.LogWarning("[SHADER] Ocean_Plane has no MeshRenderer");
+                    return;
+                }
+
+                var sharedMaterials = renderer.sharedMaterials;
+                bool anyModified = false;
+
+                for (int i = 0; i < sharedMaterials.Length; i++)
+                {
+                    var material = sharedMaterials[i];
+                    if (material == null) continue;
+
+                    Log.LogInfo($"[SHADER] Material[{i}]: {material.name}, shader: {material.shader?.name}");
+
+                    if (material.HasProperty("_Refraction"))
+                    {
+                        float oldVal = material.GetFloat("_Refraction");
+                        material.SetFloat("_Refraction", 0f);
+                        Log.LogInfo($"[SHADER]   _Refraction: {oldVal:F3} -> 0.000");
+                        anyModified = true;
+                    }
+
+                    if (material.HasProperty("_Depth"))
+                    {
+                        float oldVal = material.GetFloat("_Depth");
+                        material.SetFloat("_Depth", oldVal * 0.2f);
+                        Log.LogInfo($"[SHADER]   _Depth: {oldVal:F3} -> {oldVal * 0.2f:F3}");
+                        anyModified = true;
+                    }
+
+                    if (material.HasProperty("_Displacement"))
+                    {
+                        float oldVal = material.GetFloat("_Displacement");
+                        material.SetFloat("_Displacement", oldVal * 0.1f);
+                        Log.LogInfo($"[SHADER]   _Displacement: {oldVal:F3} -> {oldVal * 0.1f:F3}");
+                        anyModified = true;
+                    }
+                }
+
+                if (anyModified)
+                {
+                    _shaderAlreadyModified = true;
+                }
+
+                DisableDeeperPlane(depthPlane);
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[SHADER] Error: {ex}");
+            }
+        }
+
+        private static void DisableDeeperPlane(MonoBehaviour depthPlane)
+        {
+            try
+            {
+                var visualsField = AccessTools.Field(_depthPlaneType, "visuals");
+                if (visualsField == null) return;
+
+                var visuals = visualsField.GetValue(depthPlane) as IList;
+                if (visuals == null || visuals.Count == 0) return;
+
+                foreach (var planeInfo in visuals)
+                {
+                    if (planeInfo == null) continue;
+
+                    var deeperPlaneField = planeInfo.GetType().GetField("DeeperPlane");
+                    if (deeperPlaneField == null) continue;
+
+                    var deeperPlane = deeperPlaneField.GetValue(planeInfo) as GameObject;
+                    if (deeperPlane == null) continue;
+
+                    var deeperRenderer = deeperPlane.GetComponent<MeshRenderer>();
+                    if (deeperRenderer != null)
+                    {
+                        deeperRenderer.enabled = false;
+                        Log.LogInfo($"[DEEPER] Disabled DeeperPlane renderer: {deeperPlane.name}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[DEEPER] Error: {ex.Message}");
+            }
+        }
+
+        private static bool _filterLoggedOnce = false;
+
+        public static bool StartTransition_Prefix(object filterType)
+        {
+            try
+            {
+                int filterValue = (int)filterType;
+
+                if (filterValue == 3) // Blurred
+                {
+                    if (!_filterLoggedOnce)
+                    {
+                        Log.LogInfo("[FILTER] Blocked Blurred filter transition");
+                        _filterLoggedOnce = true;
+                    }
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return true;
+            }
+        }
+
+        private static void TryReduceBlur()
+        {
+            try
+            {
+                Type volumeType = null;
+
+                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    if (assembly.FullName.Contains("RenderPipelines") || assembly.FullName.Contains("Rendering"))
+                    {
+                        volumeType = assembly.GetType("UnityEngine.Rendering.Volume");
+                        if (volumeType != null) break;
+                    }
+                }
+
+                if (volumeType == null)
+                {
+                    volumeType = AccessTools.TypeByName("UnityEngine.Rendering.Volume");
+                }
+
+                if (volumeType == null)
+                {
+                    Log.LogWarning("[BLUR] Volume type not found");
+                    _blurReductionApplied = true;
+                    return;
+                }
+
+                var weightField = volumeType.GetField("weight", BindingFlags.Public | BindingFlags.Instance);
+                if (weightField == null)
+                {
+                    var weightProp = volumeType.GetProperty("weight", BindingFlags.Public | BindingFlags.Instance);
+                    if (weightProp != null)
+                    {
+                        Log.LogInfo("[BLUR] weight is a property, not a field");
+                        TryReduceBlurViaProperty(volumeType, weightProp);
+                        return;
+                    }
+
+                    Log.LogWarning("[BLUR] Volume.weight field/property not found");
+                    _blurReductionApplied = true;
+                    return;
+                }
+
+                Log.LogInfo("[BLUR] Found Volume.weight as FIELD");
+
+                var allVolumes = UnityEngine.Object.FindObjectsOfType(volumeType);
+                Log.LogInfo($"[BLUR] Found {allVolumes.Length} Volume components");
+
+                foreach (var volume in allVolumes)
+                {
+                    var volMono = volume as MonoBehaviour;
+                    if (volMono == null || !volMono.enabled) continue;
+
+                    float currentWeight = (float)weightField.GetValue(volume);
+                    if (currentWeight < 0.1f) continue;
+
+                    if (!_originalVolumeWeights.ContainsKey(volume))
+                    {
+                        _originalVolumeWeights[volume] = currentWeight;
+                    }
+
+                    float newWeight = currentWeight * 0.1f;
+                    weightField.SetValue(volume, newWeight);
+
+                    Log.LogInfo($"[BLUR] Volume '{volMono.name}' weight: {currentWeight:F2} -> {newWeight:F2}");
+                }
+
+                _blurReductionApplied = true;
+                Log.LogInfo($"[BLUR] Reduced {_originalVolumeWeights.Count} volumes");
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[BLUR] Error: {ex.Message}");
+                _blurReductionApplied = true;
+            }
+        }
+
+        private static void TryReduceBlurViaProperty(Type volumeType, PropertyInfo weightProp)
+        {
+            try
+            {
+                var allVolumes = UnityEngine.Object.FindObjectsOfType(volumeType);
+
+                foreach (var volume in allVolumes)
+                {
+                    var volMono = volume as MonoBehaviour;
+                    if (volMono == null || !volMono.enabled) continue;
+
+                    float currentWeight = (float)weightProp.GetValue(volume);
+                    if (currentWeight < 0.1f) continue;
+
+                    if (!_originalVolumeWeights.ContainsKey(volume))
+                    {
+                        _originalVolumeWeights[volume] = currentWeight;
+                    }
+
+                    float newWeight = currentWeight * 0.1f;
+                    weightProp.SetValue(volume, newWeight);
+
+                    Log.LogInfo($"[BLUR] Volume '{volMono.name}' weight (via prop): {currentWeight:F2} -> {newWeight:F2}");
+                }
+
+                _blurReductionApplied = true;
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[BLUR] Error via property: {ex.Message}");
+                _blurReductionApplied = true;
+            }
+        }
+
+        private static void TryRestoreBlur()
+        {
+            try
+            {
+                Type volumeType = AccessTools.TypeByName("UnityEngine.Rendering.Volume");
+                if (volumeType == null)
+                {
+                    _originalVolumeWeights.Clear();
+                    _blurReductionApplied = false;
+                    return;
+                }
+
+                var weightField = volumeType.GetField("weight", BindingFlags.Public | BindingFlags.Instance);
+                var weightProp = weightField == null ? volumeType.GetProperty("weight") : null;
+
+                foreach (var kvp in _originalVolumeWeights)
+                {
+                    if (kvp.Key == null) continue;
+
+                    if (weightField != null)
+                    {
+                        weightField.SetValue(kvp.Key, kvp.Value);
+                    }
+                    else if (weightProp != null)
+                    {
+                        weightProp.SetValue(kvp.Key, kvp.Value);
+                    }
+                }
+
+                Log.LogInfo($"[BLUR] Restored {_originalVolumeWeights.Count} volumes");
+                _originalVolumeWeights.Clear();
+                _blurReductionApplied = false;
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[BLUR] Restore error: {ex.Message}");
+                _originalVolumeWeights.Clear();
+                _blurReductionApplied = false;
+            }
+        }
+
+        private static Transform FindChildRecursive(Transform parent, string name)
+        {
+            foreach (Transform child in parent)
+            {
+                if (child.name == name) return child;
+                var found = FindChildRecursive(child, name);
+                if (found != null) return found;
+            }
+            return null;
+        }
+
+        // ========== EXISTING PATCHES (PROP INJECTION) ==========
+
+        private void PatchStageManager()
+        {
+            if (_stageManagerType != null)
+            {
+                var awakeMethod = AccessTools.Method(_stageManagerType, "Awake");
+                if (awakeMethod != null)
+                {
+                    var postfix = new HarmonyMethod(typeof(Plugin).GetMethod(nameof(StageManager_Awake_Postfix),
+                        BindingFlags.Public | BindingFlags.Static));
+                    _harmony.Patch(awakeMethod, postfix: postfix);
+                    Log.LogInfo("[INJECTOR] Patched StageManager.Awake");
+                }
+            }
+        }
+
+        private void PatchEndlessPropBuildPrefab()
+        {
+            if (_endlessPropType != null)
+            {
+                var buildPrefabMethod = AccessTools.Method(_endlessPropType, "BuildPrefab");
+                if (buildPrefabMethod != null)
+                {
+                    var prefix = new HarmonyMethod(typeof(Plugin).GetMethod(nameof(BuildPrefab_Prefix),
+                        BindingFlags.Public | BindingFlags.Static));
+                    var postfix = new HarmonyMethod(typeof(Plugin).GetMethod(nameof(BuildPrefab_Postfix),
+                        BindingFlags.Public | BindingFlags.Static));
+                    _harmony.Patch(buildPrefabMethod, prefix: prefix, postfix: postfix);
+                    Log.LogInfo("[INJECTOR] Patched EndlessProp.BuildPrefab");
+                }
+            }
+        }
+
+        private void PatchSpawnPreview()
+        {
+            if (_propBasedToolType != null)
+            {
+                var spawnPreviewMethod = AccessTools.Method(_propBasedToolType, "SpawnPreview");
+                if (spawnPreviewMethod != null)
+                {
+                    var prefix = new HarmonyMethod(typeof(Plugin).GetMethod(nameof(SpawnPreview_Prefix),
+                        BindingFlags.Public | BindingFlags.Static));
+                    var postfix = new HarmonyMethod(typeof(Plugin).GetMethod(nameof(SpawnPreview_Postfix),
+                        BindingFlags.Public | BindingFlags.Static));
+                    _harmony.Patch(spawnPreviewMethod, prefix: prefix, postfix: postfix);
+                    Log.LogInfo("[INJECTOR] Patched PropBasedTool.SpawnPreview");
+                }
+            }
+        }
+
+        private void PatchFindAndManageChildRenderers()
+        {
+            if (_endlessPropType != null)
+            {
+                var findRenderersMethod = AccessTools.Method(_endlessPropType, "FindAndManageChildRenderers");
+                if (findRenderersMethod != null)
+                {
+                    var prefix = new HarmonyMethod(typeof(Plugin).GetMethod(nameof(FindAndManageChildRenderers_Prefix),
+                        BindingFlags.Public | BindingFlags.Static));
+                    var postfix = new HarmonyMethod(typeof(Plugin).GetMethod(nameof(FindAndManageChildRenderers_Postfix),
+                        BindingFlags.Public | BindingFlags.Static));
+                    _harmony.Patch(findRenderersMethod, prefix: prefix, postfix: postfix);
+                    Log.LogInfo("[INJECTOR] Patched EndlessProp.FindAndManageChildRenderers");
+                }
+            }
+        }
+
+        public static void BuildPrefab_Prefix(object __instance, object prop, GameObject testPrefab, object testScript)
+        {
+            try
+            {
+                var assetCoreType = AccessTools.TypeByName("Endless.Assets.AssetCore");
+                var nameField = assetCoreType?.GetField("Name");
+                var propName = nameField?.GetValue(prop) as string ?? "UNKNOWN";
+
+                var baseTypeIdField = AccessTools.Field(_propType, "baseTypeId");
+                var baseTypeId = baseTypeIdField?.GetValue(prop) as string ?? "UNKNOWN";
+
+                if (baseTypeId == CustomBaseTypeGuid)
+                {
+                    Log.LogInfo($"[TRACE] Building custom prop: {propName}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[TRACE] BuildPrefab_Prefix error: {ex.Message}");
+            }
+        }
+
+        public static void BuildPrefab_Postfix(object __instance) { }
+        public static void SpawnPreview_Prefix(object __instance, object runtimePropInfo) { }
+        public static void SpawnPreview_Postfix(object __instance) { }
+        public static void FindAndManageChildRenderers_Prefix(object __instance, GameObject targetObject) { }
+        public static void FindAndManageChildRenderers_Postfix(object __instance) { }
+
+        public static void StageManager_Awake_Postfix(object __instance)
+        {
+            try
+            {
+                Log.LogInfo("[INJECTOR] StageManager.Awake - Creating custom prop");
+
+                LogAvailableShaders();
+                CreateCustomPrefab();
+                CreateCustomBaseTypeDefinition();
+                InjectDefinitionIntoBaseTypeList(__instance);
+                InjectCustomProp(__instance);
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[INJECTOR] StageManager.Awake failed: {ex}");
+            }
+        }
+
+        private static void InjectDefinitionIntoBaseTypeList(object stageManager)
+        {
+            try
+            {
+                var baseTypeListField = AccessTools.Field(_stageManagerType, "baseTypeList");
+                var baseTypeList = baseTypeListField?.GetValue(stageManager);
+                if (baseTypeList == null) return;
+
+                var componentsField = AccessTools.Field(_abstractComponentListBaseType, "components");
+                var componentsList = componentsField?.GetValue(baseTypeList);
+                if (componentsList == null) return;
+
+                var addMethod = componentsList.GetType().GetMethod("Add");
+                addMethod?.Invoke(componentsList, new object[] { _customBaseTypeDefinition });
+
+                var definitionMapField = AccessTools.Field(_abstractComponentListBaseType, "definitionMap");
+                if (definitionMapField?.GetValue(baseTypeList) != null)
+                {
+                    definitionMapField.SetValue(baseTypeList, null);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[INJECTOR] InjectDefinitionIntoBaseTypeList failed: {ex}");
+            }
+        }
+
+        private static void CreateCustomPrefab()
+        {
+            if (_customPrefab != null) return;
+
+            if (LoadAssetBundle())
+            {
+                _customPrefab = new GameObject("CustomInjectedProp_BaseType");
+                _customPrefab.SetActive(false);
+
+                var staticPropType = AccessTools.TypeByName("Endless.Gameplay.StaticProp");
+                if (staticPropType != null) _customPrefab.AddComponent(staticPropType);
+
+                _customPrefab.SetActive(true);
+                UnityEngine.Object.DontDestroyOnLoad(_customPrefab);
+
+                if (_loadedPrefab != null) _visualPrefab = _loadedPrefab;
+            }
+            else
+            {
+                CreateFallbackPrefab();
+            }
+        }
+
+        private static bool LoadAssetBundle()
+        {
+            try
+            {
+                string pluginPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                string bundlePath = System.IO.Path.Combine(pluginPath, "custom_props.bundle");
+
+                if (!System.IO.File.Exists(bundlePath)) return false;
+
+                _customPropsBundle = AssetBundle.LoadFromFile(bundlePath);
+                if (_customPropsBundle == null) return false;
+
+                string[] assetNames = _customPropsBundle.GetAllAssetNames();
+
+                foreach (var name in assetNames)
+                {
+                    if (name.EndsWith(".prefab"))
+                    {
+                        _loadedPrefab = _customPropsBundle.LoadAsset<GameObject>(name);
+                        if (_loadedPrefab != null) break;
+                    }
+                }
+
+                foreach (var name in assetNames)
+                {
+                    if (name.Contains("icon") && name.EndsWith(".png"))
+                    {
+                        _loadedIcon = _customPropsBundle.LoadAsset<Sprite>(name);
+                        if (_loadedIcon != null) break;
+                    }
+                }
+
+                if (_loadedIcon == null)
+                {
+                    var sprites = _customPropsBundle.LoadAllAssets<Sprite>();
+                    if (sprites.Length > 0) _loadedIcon = sprites[0];
+                }
+
+                return _loadedPrefab != null;
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[INJECTOR] Error loading AssetBundle: {ex}");
+                return false;
+            }
+        }
+
+        private static void CreateFallbackPrefab()
+        {
+            _customPrefab = new GameObject("CustomInjectedProp_BaseType");
+            _customPrefab.SetActive(false);
+
+            var staticPropType = AccessTools.TypeByName("Endless.Gameplay.StaticProp");
+            if (staticPropType != null) _customPrefab.AddComponent(staticPropType);
+
+            _customPrefab.SetActive(true);
+            UnityEngine.Object.DontDestroyOnLoad(_customPrefab);
+
+            _visualPrefab = new GameObject("CustomInjectedProp_Visual");
+            _visualPrefab.transform.position = new Vector3(0, -10000, 0);
+
+            var meshFilter = _visualPrefab.AddComponent<MeshFilter>();
+            var meshRenderer = _visualPrefab.AddComponent<MeshRenderer>();
+            meshFilter.mesh = CreateCubeMesh();
+
+            var tempCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            meshRenderer.material = new Material(tempCube.GetComponent<MeshRenderer>().sharedMaterial);
+            meshRenderer.material.color = Color.magenta;
+            UnityEngine.Object.DestroyImmediate(tempCube);
+
+            UnityEngine.Object.DontDestroyOnLoad(_visualPrefab);
+        }
+
+        private static Mesh CreateCubeMesh()
+        {
+            var mesh = new Mesh();
+
+            Vector3[] vertices = {
+                new Vector3(-0.5f, -0.5f, -0.5f), new Vector3( 0.5f, -0.5f, -0.5f),
+                new Vector3( 0.5f,  0.5f, -0.5f), new Vector3(-0.5f,  0.5f, -0.5f),
+                new Vector3(-0.5f, -0.5f,  0.5f), new Vector3( 0.5f, -0.5f,  0.5f),
+                new Vector3( 0.5f,  0.5f,  0.5f), new Vector3(-0.5f,  0.5f,  0.5f)
+            };
+
+            int[] triangles = {
+                0, 2, 1, 0, 3, 2, 1, 6, 5, 1, 2, 6,
+                5, 7, 4, 5, 6, 7, 4, 3, 0, 4, 7, 3,
+                3, 6, 2, 3, 7, 6, 4, 1, 5, 4, 0, 1
+            };
+
+            mesh.vertices = vertices;
+            mesh.triangles = triangles;
+            mesh.RecalculateNormals();
+
+            return mesh;
+        }
+
+        private static void CreateCustomBaseTypeDefinition()
+        {
+            if (_customBaseTypeDefinition != null) return;
+
+            _customBaseTypeDefinition = ScriptableObject.CreateInstance(_baseTypeDefinitionType);
+
+            var prefabField = AccessTools.Field(_componentDefinitionType, "prefab");
+            prefabField?.SetValue(_customBaseTypeDefinition, _customPrefab);
+
+            var componentIdField = AccessTools.Field(_componentDefinitionType, "componentId");
+            if (componentIdField != null)
+            {
+                var guid = CreateSerializableGuid(CustomBaseTypeGuid);
+                if (guid != null) componentIdField.SetValue(_customBaseTypeDefinition, guid);
+            }
+
+            var isUserExposedField = AccessTools.Field(_baseTypeDefinitionType, "isUserExposed");
+            isUserExposedField?.SetValue(_customBaseTypeDefinition, true);
+
+            var isNetworkedField = AccessTools.Field(_componentDefinitionType, "isNetworked");
+            isNetworkedField?.SetValue(_customBaseTypeDefinition, false);
+
+            CustomBaseTypes[CustomBaseTypeGuid] = _customBaseTypeDefinition;
+            UnityEngine.Object.DontDestroyOnLoad(_customBaseTypeDefinition as UnityEngine.Object);
+        }
+
+        private static object CreateSerializableGuid(string guidString)
+        {
+            try
+            {
+                var ctor = _serializableGuidType.GetConstructor(new Type[] { typeof(string) });
+                if (ctor != null) return ctor.Invoke(new object[] { guidString });
+
+                var implicitOp = _serializableGuidType.GetMethod("op_Implicit", new Type[] { typeof(string) });
+                if (implicitOp != null) return implicitOp.Invoke(null, new object[] { guidString });
+
+                var guidCtor = _serializableGuidType.GetConstructor(new Type[] { typeof(Guid) });
+                if (guidCtor != null) return guidCtor.Invoke(new object[] { Guid.Parse(guidString) });
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[INJECTOR] CreateSerializableGuid failed: {ex}");
+            }
+            return null;
+        }
+
+        private static void InjectCustomProp(object stageManager)
+        {
+            try
+            {
+                var prop = Activator.CreateInstance(_propType);
+                var assetCoreType = AccessTools.TypeByName("Endless.Assets.AssetCore");
+
+                var nameField = assetCoreType?.GetField("Name");
+                nameField?.SetValue(prop, _loadedPrefab != null ? _loadedPrefab.name : "Custom Injected Prop");
+
+                var assetIdField = assetCoreType?.GetField("AssetID");
+                assetIdField?.SetValue(prop, CustomPropGuid);
+
+                var assetTypeField = assetCoreType?.GetField("AssetType");
+                assetTypeField?.SetValue(prop, "Prop");
+
+                var baseTypeIdField = AccessTools.Field(_propType, "baseTypeId");
+                baseTypeIdField?.SetValue(prop, CustomBaseTypeGuid);
+
+                var componentIdsField = AccessTools.Field(_propType, "componentIds");
+                componentIdsField?.SetValue(prop, new List<string>());
+
+                var propLocationOffsetsField = AccessTools.Field(_propType, "propLocationOffsets");
+                if (propLocationOffsetsField != null)
+                {
+                    var propLocationOffsetType = AccessTools.TypeByName("Endless.Props.Assets.PropLocationOffset");
+                    if (propLocationOffsetType != null)
+                    {
+                        var offset = Activator.CreateInstance(propLocationOffsetType);
+                        propLocationOffsetType.GetField("Offset")?.SetValue(offset, Vector3Int.zero);
+
+                        var offsetArray = Array.CreateInstance(propLocationOffsetType, 1);
+                        offsetArray.SetValue(offset, 0);
+                        propLocationOffsetsField.SetValue(prop, offsetArray);
+                    }
+                }
+
+                CustomProps[CustomPropGuid] = prop;
+
+                var injectPropMethod = AccessTools.Method(_stageManagerType, "InjectProp");
+                if (injectPropMethod != null)
+                {
+                    Sprite iconSprite = _loadedIcon;
+                    if (iconSprite == null)
+                    {
+                        var iconTexture = new Texture2D(64, 64);
+                        var colors = new Color[64 * 64];
+                        for (int i = 0; i < colors.Length; i++) colors[i] = Color.magenta;
+                        iconTexture.SetPixels(colors);
+                        iconTexture.Apply();
+                        iconSprite = Sprite.Create(iconTexture, new Rect(0, 0, 64, 64), new Vector2(0.5f, 0.5f));
+                    }
+
+                    injectPropMethod.Invoke(stageManager, new object[] { prop, _visualPrefab, null, iconSprite });
+                    Log.LogInfo("[INJECTOR] Called StageManager.InjectProp!");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[INJECTOR] InjectCustomProp failed: {ex}");
+            }
+        }
+
+        private static void LogAvailableShaders()
+        {
+            try
+            {
+                var shaderClusterManagerType = AccessTools.TypeByName("Endless.Gameplay.VisualManagement.ShaderClusterManager");
+                if (shaderClusterManagerType == null) return;
+
+                var instanceProp = shaderClusterManagerType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+                var instance = instanceProp?.GetValue(null);
+                if (instance == null) return;
+
+                var listField = AccessTools.Field(shaderClusterManagerType, "shaderClusterList");
+                var clusterList = listField?.GetValue(instance) as IList;
+                if (clusterList == null) return;
+
+                foreach (var cluster in clusterList)
+                {
+                    if (cluster == null) continue;
+                    var displayId = cluster.GetType().GetField("DisplayId")?.GetValue(cluster) as string ?? "Unknown";
+                    var primary = cluster.GetType().GetField("primaryShader")?.GetValue(cluster) as Shader;
+                    Log.LogInfo($"[INJECTOR] Cluster {displayId}: {primary?.name ?? "null"}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"[INJECTOR] LogAvailableShaders failed: {ex}");
+            }
+        }
+
+        void OnDestroy()
+        {
+            _harmony?.UnpatchSelf();
+        }
+    }
+}

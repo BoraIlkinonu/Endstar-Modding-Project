@@ -1,0 +1,35 @@
+namespace Endless.Gameplay.LuaEnums;
+
+public enum WorldState
+{
+	AttackTarget,
+	CanBackstep,
+	CanReachHealthPickup,
+	EngageTarget,
+	GotAway,
+	HasAttackPermission,
+	HasFollowTarget,
+	HasLos,
+	HasAttackTarget,
+	Idle,
+	IsAtDestination,
+	IsAttacker,
+	IsEngaged,
+	IsRangedAttacker,
+	IsFarEnoughAwayForMelee,
+	IsFarEnoughAwayForRanged,
+	IsInEngageRange,
+	IsInMeleeRange,
+	IsInRangedAttackRange,
+	IsNearFollowTarget,
+	IsOutsideCloseRange,
+	IsOutsideNearRange,
+	RecoverHealth,
+	Rove,
+	Wander,
+	CanFidget,
+	IsOnNavigableCell,
+	IsNotPassive,
+	Nothing,
+	LostTarget
+}

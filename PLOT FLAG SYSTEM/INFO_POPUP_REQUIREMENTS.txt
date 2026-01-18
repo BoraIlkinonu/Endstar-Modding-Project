@@ -1,0 +1,40 @@
+INFO POPUP UI REQUIREMENTS - DO NOT VIOLATE
+============================================
+
+1. POSITION
+   - Anchored to LEFT side (same as prop tool window - key 3)
+   - Upper left corner, right beneath player name/avatar UI
+
+2. TRIGGER
+   - ONLY on prop pickup
+   - NO automatic popup ever
+
+3. CLOSING
+   - Manual close ONLY by user clicking close button
+   - NO timer-based auto-close EVER
+
+4. FILTERING
+   - Only shows for props assigned in ItemInfoConfig.json
+   - Won't show for other props
+
+5. IMAGE LAYOUT
+   - Image spans ENTIRE WIDTH of window (with margins)
+   - NOT a small icon
+
+6. TEXT LAYOUT
+   - Text is BELOW the image
+   - NOT beside, above, or around the image
+   - Structure: Image on top, text beneath
+
+LAYOUT STRUCTURE:
++---------------------------+
+|  [X] Close Button         |
++---------------------------+
+|                           |
+|    IMAGE (full width)     |
+|                           |
++---------------------------+
+|   Title                   |
+|   Description text here   |
+|   spans multiple lines    |
++---------------------------+

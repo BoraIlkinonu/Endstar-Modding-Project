@@ -1,0 +1,3 @@
+@echo off
+echo Launching Endstar...
+start "" "C:\Endless Studios\Endless Launcher\Endstar\Endstar.exe"

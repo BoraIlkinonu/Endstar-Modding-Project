@@ -1,0 +1,75 @@
+MULTISTAGEDIALOOGUE - QUICK REFERENCE
+=====================================
+
+PURPOSE: NPC dialogue that progresses through stages. Each stage must be
+completed before the next becomes available. Progress persists across levels.
+
+INSPECTOR SETUP
+---------------
+DialogueId:        "MyNPC_Dialogue"     (unique ID for save/load)
+StageNames:        ["Intro", "Quest", "Reward"]
+StageDelimiter:    "---"
+Text (LocalizedStringList):
+  [0] "Hello traveler!"
+  [1] "Welcome to our village."
+  [2] "---"                          <-- Stage delimiter
+  [3] "Did you find the artifact?"
+  [4] "Bring it to me."
+  [5] "---"                          <-- Stage delimiter
+  [6] "Thank you!"
+  [7] "Here is your reward."
+
+OnlyRunOnce:       true/false   (block re-interaction after completion)
+PersistentProgress: true        (save stage progress across levels)
+OnStart:           true         (REQUIRED - enables immediate NPC interaction)
+DebugMode:         true/false   (enable console + event debug output)
+
+WIRING
+------
+Basic Setup:
+  Level Start → MultiStageDialogue NPC ConfigureNpc
+
+Debug Display (optional):
+  MultiStageDialogue OnDebugOutput → Billboard SetRawText
+
+Stage-Specific Actions:
+  MultiStageDialogue OnStageCompleted → FlagFilter Check
+  FlagFilter OnMatch → [Your Action]
+  (Set FlagFilter.FlagName = "Quest" to trigger on Quest stage complete)
+
+External Control:
+  SomeEvent → MultiStageDialogue SetStage("Quest")
+  SomeEvent → MultiStageDialogue AdvanceStage
+  SomeEvent → MultiStageDialogue ResetDialogue
+
+EVENTS (OUTPUTS)
+----------------
+OnDialogueStarted()              - First interaction with NPC
+OnDialogueCompleted()            - All stages finished
+OnStageStarted(stageName)        - Stage begins (e.g., "Intro")
+OnStageCompleted(stageName)      - Stage finished (e.g., "Intro")
+OnStageChanged(stageName)        - Stage changed via receiver
+OnDialogueReset()                - Dialogue was reset
+OnCurrentStage(stageName)        - Response to GetCurrentStage
+OnInteractionCanceled()          - Player walked away mid-dialogue
+OnDebugOutput(message)           - Debug text (wire to Billboard)
+
+RECEIVERS (INPUTS)
+------------------
+ConfigureNpc()                   - Initialize NPC (call from Level Start)
+SetStage(stageName)              - Jump to specific stage by name
+AdvanceStage()                   - Move to next stage
+ResetDialogue()                  - Reset to initial state
+GetCurrentStage()                - Fire OnCurrentStage event
+OutputDebugState()               - Output current state to debug
+DebugLog(message)                - Log custom debug message
+
+FILTERING STAGE EVENTS
+----------------------
+Use FlagFilter to react to specific stage completions:
+
+1. Place FlagFilter node, set FlagName = "Quest"
+2. Wire: MultiStageDialogue OnStageCompleted → FlagFilter Check
+3. Wire: FlagFilter OnMatch → [Action for Quest completion]
+
+Repeat with additional FlagFilter nodes for other stages.

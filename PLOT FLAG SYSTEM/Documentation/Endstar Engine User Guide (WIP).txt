@@ -1,0 +1,492 @@
+﻿Endstar Engine User Guide (WIP)
+Documentation v1.0
+05/28/2025
+
+
+
+
+
+
+1. What is Endstar Engine?
+2. How to download Endstar Engine
+3. Endstar Engine Menu UI
+○ Create/Play Tab
+○ Party Tab
+○ Options Tab
+4. Creating a Game
+○ Creating a Game
+○ Creating a Level
+5. Editor Movement Controls
+○ Movement and navigation
+○ Ghost Mode (Only available in editor mode)
+6. Editor UI
+○ Editor Tool
+○ Ghost Mode enable/disable
+○ Bug report/Feedback
+○ Play mode
+○ Photo mode
+○ Level Editor
+■ Level info
+■ Collaborators
+■ Spawn Point Order
+■ Revisions
+○ Game Editor
+■ Info
+■ Levels
+■ Collaborators
+■ Publish
+■ Game Library
+○ Party
+7. Editor/Creator Tools
+○ 1. Clear Tool
+○ 2. Tileset Menu
+○ 3. Props Menu
+○ 4. Eraser Tool
+○ 5. Wiring Tool
+○ 6. Inspector Tool
+○ 7. Copy/paste Tool
+○ 8. Move/Reposition Tool
+8. Props
+● Countdown Timer
+● Damager Block
+● Teleporter
+● Health Modifier
+● Random Multiple NPC Spawner
+● Item Granter
+● Item Quantity Checker
+● Automatic Item Ensurer
+● Do Once Per Context
+● Do Once Rule Block
+● Move to Camera
+● Simple Local Cutscene
+● Sequence Rule
+● Healer Block
+● Group Nodes
+● Interactable Volume
+● Trigger Volume
+● Launcher Node
+● NPC Spawner
+● Player Downed Rule
+● Player Has Item
+● Player Input Modifier
+● Dynamic Item Spawner
+● Checkpoint Block
+● Dialogue Block
+● Text Bubble Bark Block
+● Counter Rule
+● Portal
+● Randomizer Rule Block
+● Filter Block
+● Ambient Block
+● Timer Rule Block
+● Level Start Rule Block
+● Level Transition Rule BLock
+● Bool Gate Rule
+● Relay Block
+● Progress Counter Block
+● Stand Node
+● Wander Node
+● Rove Node
+
+
+
+
+1. What is Endstar Engine?
+
+
+Endstar Engine is a block based engine made in unity, catered towards those who want to get into game development and does not have sufficient programming or developing skills in games. The engine is made in unity and is similar to Minecraft and Roblox. Users can choose assets that already exist in the asset library within the engine. All they have to do is drag and drop and start connecting the different assets to create new game mechanics.
+2. How to download Endstar Engine
+
+
+3. Endstar Engine Menu UI
+   * Create/Play Tab
+      * In the create section of this tab, users can start creating their own games.
+      * In the play section of the tab, users can play games published by other users.
+   * Party Tab
+      * Users can add up to 3 teammates in the party tab (Total of 4 members in a party). Click on the + icon to add friends, and then type in your friends username. Clicking on the gear wheel icon allows you to change the avatar for your character. Press the ESC button to go back to the Menu.
+   * Options Tab
+      * You can adjust graphical settings and resolution in this tab. If your PC/Laptop/Macbook is not able to run Endstar smoothly, you can reduce the quality of the game to get better performance. Lowering the resolution to a lower number would increase performance at the cost of visual clarity (visuals become blurrier the lower the resolution number is). You can also choose preset graphics (Very Low, Low, Medium, High, Very High, Ultra) or choose Custom graphical options.
+
+
+
+
+4. Creating a Game
+   * Creating a Game
+      * Click on Create new Game Button
+      * Name your game in the ‘Game Name’ text field.
+      * Adding the Description is optional. This is where you describe your game (the theme of your game and what the game is about).
+      * Collaborators - You can add collaborators and give them certain permissions so that they can edit the game you are building 
+      * Click on Create
+   * Creating a Level
+      * After clicking on create, another menu will pop up asking you to name your first level. Name the level as you wish to do so.
+      * Choose one of the provided level templates, or choose an empty template. You can edit the templates after confirming and loading the editor.
+
+
+5. Editor Movement Controls
+   * Movement and navigation
+      * Movement - ASDW keys to move around the map
+      * Change camera angles - Hold left mouse button and drag the mouse
+   * Ghost Mode (Only available in editor mode)
+      * Press G to enable and disable Ghost Mode. In this mode you can fly around the map, go through props and tilesets as if you were a ghost.
+      * Hold spacebar button to fly up
+      * Hold Z key to go down
+
+
+
+
+
+
+6. Editor UI
+   * Editor Tool 
+      * At the bottom middle of your screen, you’ll find a set of numbered icons, each with a distinct color. These icons represent various editor tools that allow you to build your game, place tilesets, add props, and create game mechanics and systems.
+   * Ghost Mode enable/disable 
+      * On the bottom right-hand side of the screen, you'll find a white switch indicating whether Ghost Mode is enabled. The switch turns green when Ghost Mode is active.
+
+
+
+
+   * Bug report/Feedback 
+      * On the bottom left, you’ll find a yellow button with a magnifying glass icon. This button allows you to submit bug reports, feedback, or suggestions for the engine. Alternatively, you can press the F9 key to open this menu.
+   * Play mode 
+      * You can enter play mode from the editor mode by clicking the blue play button on the top middle of the screen. To return to edit mode, see Return to Edit mode.
+   * Photo mode 
+      *  On the top right of the screen, you will see 4 buttons in sequence. The first of these is the photo mode button. You can take screenshots of your game using the photo mode.
+      * Once you enter photo mode, you can move around the level and change the camera angle to create the perfect frame for your screenshot. Click on the blue photo icon in the bottom middle of the screen to take a screenshot. 
+      * You can take up to 9 screenshots.
+      * Click on the eye button on the top right to hide your character.
+      * What does the layer button beside the eye button do?
+      * Click on the X button on the top right to open a menu where the screenshots you took will be displayed. You will need to click on the white download button to save the screenshots in a folder of your choosing.
+   * Level Editor 
+      * The second button on the top right, right after the photo mode button. 
+      * Level info 
+         * Level Title - Rename name of the level
+         * Level Description - Add/Change description of your level
+         * Level thumbnails - The screenshots you took and saved will be shown here. You can choose one of the screenshots you took and set it as the thumbnail for your level.
+      * Collaborators
+         * Asset Edit Roles - 
+         * Inherited Edit Roles -
+      * Spawn Point Order
+      * Revisions 
+         * On the left hand side you will find numbered tabs with a Revert To button next to it. The numbers indicate the number of edits you have made to your level. Each edit you made to your level will be recorded here, along with the date and time of when you made the edit. Click on one of the numbers and read the description in the Revisions tab to see what changes were made at a specific day and time.
+   * Game Editor
+      * The third button on the top right corner, after the Level Editor button.
+      * Info
+         * Game Title - Change title of the game
+         * Game Description - Add/Change description of your game
+         * Game Thumbnails - The screenshots you took and saved will be shown here. You can choose one of the screenshots you took and set it as the thumbnail for your level.
+      * Levels
+         * In this tab of the Game Editor, you can view all the levels you have created for your game. You can also add empty levels for your game by clicking on the + button. You can name and choose a template for your new level and edit it later on.
+      * Collaborators
+         * You can add collaborators by clicking the + button. A FRIENDS menu will pop up on the right hand side. Type the username of the user that you want to add as a collaborator. Once you add a user, you can assign a role to them.
+            * None - Users assigned this role will have restricted access. They will not be able to edit the level or game.
+            * Viewer - Can open the game with the creator/editor, but cannot make changes, or invite others as collaborators.
+            * Editor - Can make changes to the game in the creator/editor, and Remove or Add Viewers
+            * Publisher - Can make changes to the game in the creator, and Remove or Add Viewers and Editors.
+            * Owner - Can Remove or Add Viewers, Editors, and Publishers. Once a user is given the role of Owner, it cannot be taken away. Owners can also make changes to the game through the creator/editor.
+      * Publish
+         * Here you can publish your game build. Once published, other users can play your game, but cannot edit it unless you have added them as a collaborator and set their role as editor or above.
+         * To publish, select the desired version from the dropdown menu. The latest build is identified by the highest version number in the list.
+      * Game Library
+         * In the left hand side, you can see all the tilesets and props that are in your asset library. To add more, click on the + button.
+         * On the right hand side, you can filter the assets by tileset or props, or both.
+   * Party
+      * The fourth button on the top right corner, after the Game Editor button.
+      * Clicking on this tab allows you to add other users to your party. Type their username in the Search by name textbox. If you are inviting someone when you are in edit mode, they won’t be able to join if they are not added as collaborators.
+
+
+7. Editor/Creator Tools
+1. Clear Tool
+      * Clicking on this tool, or by clicking its designated keyboard shortcut (designated keyboard shortcut is 1) on the keyboard, clears all active editor tool menus from the screen.
+2. Tileset Menu
+      * Clicking on this tool, or by clicking its designated keyboard shortcut on the keyboard (designated keyboard shortcut is 2), opens up the tileset menu. The Tileset Menu is a core component of the editor, providing users with access to a library of pre-defined tiles that can be used to design and build levels or environments. It allows for efficient and intuitive placement of tiles, enabling users to construct intricate layouts with precision. You can add more tilesets to your library by clicking the + button at the top of the menu.
+3. Props Menu
+      * The Props Tool allows users to access the Props Menu, by selecting the tool directly or using its designated keyboard shortcut (designated keyboard shortcut is 3). This menu offers a wide range of assets that can be placed within the game environment to enhance interactivity and visual appeal. These assets include:
+      * Collectibles: Items like coins or keys that players can gather.
+      * Rule Blocks: Elements that define game logic or conditions within a level.
+      * Environment Interactables: Objects that players can interact with, such as levers, switches, or doors.
+      * NPCs (Non-Player Characters): Characters that populate the environment, including allies, enemies, or neutral figures.
+      * Furniture and Decorations: Items like chairs, tables, or ornamental pieces to enhance the setting.
+      * Natural Elements: Trees, rocks, boulders, and other terrain features that contribute to the environment aesthetics.
+      * Weapons and Tools: Items that players can use or equip to achieve objectives.
+      * Level Gates: Portals or transitions that guide players to the next level.
+      * Traps and Hazards: Obstacles or dangers that challenge players and add complexity to gameplay.
+      * Usables: Items like health packs, potions, or temporary power-ups that provide benefits during play.
+4. Eraser Tool
+      * Use this tool by clicking on the red eraser icon (designated keyboard shortcut is 4). A menu on the top right will pop up where you can enable and disable the types of assets you want to erase.
+         * Terrain - Toggle this to remove terrain
+         * Props - Toggle this to remove props
+         * Include Wired Props - Toggle this to remove any props that are wired to another prop. This is turned off by default.
+5. Wiring Tool
+      * The Wiring Tool is used to define and establish game logic by creating connections between props. It is the blue cable icon (designated keyboard shortcut is 5) By selecting this tool and interacting with two props, users can open the Wiring Menu, where they can configure triggers and outputs to build dynamic interactions.
+         * Step 1: Click on the first prop to designate it as the trigger. This represents the initiating event (e.g., a lever being pulled).
+         * Step 2: Click on the second prop to designate it as the output. This represents the resulting action (e.g., a door opening).
+         * Step 3: In the Wiring Menu, specify the trigger event (e.g., "lever pulled") and map it to the desired output event (e.g., "door opens").
+6. Inspector Tool
+      * The inspector tool is the yellow icon with the magnifying glass logo (designated keyboard shortcut is 6).
+7. Copy/paste Tool
+      * The copy and paste tool (designated keyboard shortcut is 7) allows you to copy props (but not tiles). If you copy and paste a prop that is wired to another prop, the copied prop will also carry the same wiring and same settings of the original prop. 
+8. Move/Reposition Tool
+      * The move tool (designated keyboard shortcut is 8) allows you to move and rotate props (but not tiles) in your game world. To rotate props, click and hold the left mouse button on the prop and drag your mouse to rotate the prop.
+
+
+8. Props
+
+
+Endstar has a variety of props you can find from the props library and even more props from the extended library which you can find by clicking on the + icon at the top of the prop library. The props in Endstar allow you to create your own mechanics, systems, rules, and aesthetics of your game world.
+
+
+There are different kinds of props, but can be classified into 3.
+
+
+* Rule Blocks or Nodes - A rule block is a visual logic component that defines a condition and an outcome — basically, "if this happens, then do that." These are colored blocks with icons on them.
+* Dynamic props - Props like doors, levers, turrets, collectibles, etc that the user can interact with, and will bring a change in the game world.
+* Static props - Props like trees, vegetation, rocks, boulders, furniture, etc that offer no interaction, but will improve the aesthetics of your game world.
+
+
+Rule Blocks
+* Countdown Timer
+   * A timer that triggers actions after a set duration. Useful for timed events, challenges, or sequences.
+
+   * Damager Block
+   * Inflicts damage to any entity (player or NPC) on trigger. Can be used for traps or hazardous zones.
+
+      * Teleporter
+      * Increases or decreases the health of a target. Can heal or deal damage.
+
+         * Health Modifier
+         * Increases or decreases the health of a target. Can heal or deal damage.
+
+            * Random Multiple NPC Spawner
+            * Spawns a random selection of NPCs from a defined list. Ideal for variety in enemy encounters or setting NPC crowd volume in an area.
+
+               * Item Granter
+               * Automatically gives an item to a player or NPC. Useful for tutorials, pickups, or mission rewards.
+
+                  * Item Quantity Checker
+                  * Checks if a player has a specific quantity of an item. Often used in quests or progression gates.
+
+                     * Automatic Item Ensurer
+                     * Ensures a player always has a specific item. Useful in persistent tool availability scenarios (e.g., resources or weapons).
+                     * Do Once Per Context
+                     * Executes connected rules only once per session or per player, depending on the context. Prevents repeated triggers.
+
+
+                     * Do Once Rule Block
+                     * The gate will fire an event only if it has not done so before. This node’s behaviour can be reset through wiring.
+
+                        * Move to Camera
+                        * Moves the game camera to a specific position or target. Often used during cutscenes or narrative sequences.
+
+                           * Simple Local Cutscene
+                           * Plays a predefined animation or camera sequence locally for a player. Great for storytelling moments.
+
+                              * Sequence Rule
+                              * Executes a set of connected actions in a specific order, one after another.
+
+                                 * Healer Block
+                                 * Heals the player or NPC that activates it. Can be used as a healing zone in conjunction with trigger volume area or triggered ability.
+
+                                    * Group Nodes
+                                    * Logical container for grouping multipleNPCs together, enabling bulk operations.
+
+                                       * Interactable Volume
+                                       * Defines a space that players can interact with, often triggering rules when entered, exited, or interacted with. Once the player enters this defined zone, they can press the F key to activate the output trigger.
+
+
+                                       * Trigger Volume 
+                                       * Defines a space that players can interact with, often triggering rules when entered or exited. Once the player enters this defined zone, the output event is automatically triggered without requiring any interaction.
+
+
+                                       * Launcher Node
+                                       * Launches the player or NPC into the air. Used for jump pads, or traversal mechanics.
+
+                                          * NPC Spawner
+                                          * Spawns a specific NPC at a location. Essential for combat or escort mission design.
+
+                                             * Player Downed Rule
+                                             * Triggers logic when a player is downed (not dead). Useful for revival mechanics or fail conditions.
+
+                                                * Player Has Item
+                                                * Checks whether the player has a specific item in their inventory.
+
+                                                   * Player Input Modifier
+                                                   * Modifies player controls (e.g., disable jump, lock movement). Good for puzzles or cinematic control.
+
+                                                      * Dynamic Item Spawner
+                                                      * Spawns an item dynamically during gameplay, based on player actions or rule conditions.
+
+                                                         * Checkpoint Block
+                                                         * Saves player progress and respawn points. Essential for long levels or boss fights.
+                                                         * Dialogue Block
+                                                         * Displays dialogue between characters. Often paired with cutscenes or quest logic. This requires the player to interact with the NPC for dialogue to trigger.
+
+
+                                                         * Text Bubble Bark Block
+                                                         * Displays dialogue from NPCs without requiring interaction from the player. The dialogue will pop up when conditions are met (e.g., When a player enters trigger volume area in front of NPC, the trigger volume triggers the text bubble bark block, initiation dialogue from NPC).
+
+                                                            * Counter Rule
+                                                            * Counts specific events (e.g., enemy kills, button presses) and triggers when a threshold is met.
+
+                                                               * Portal
+                                                               * Transfers players between levels or areas.
+
+                                                                  * Randomizer Rule Block
+                                                                  * Randomly picks one or more outputs to trigger. Adds unpredictability to level design.
+
+                                                                     * Filter Block
+                                                                     * You can add a filter to your game world for aesthetics. Use this in conjunction with Ambient Rule Block for better visuals.
+                                                                     * Ambient Block
+                                                                     * Change the ambient settings of the skybox and game world.
+                                                                     * Timer Rule Block
+                                                                     * A rule that fires an event after a specified delay. Use the inspector to set the delay time.
+                                                                     * Level Start Rule Block
+                                                                     * A rule block that fires an event when the game starts. Wire this block to any prop that has a receiver to fire events when the game starts.
+                                                                     * Level Transition Rule BLock
+                                                                     * A rule block that triggers transition to another level within the current game once conditions are met for activation.
+                                                                     * Bool Gate Rule
+                                                                     * A boolean fate holds a true/false state and executes either success or failure depending.
+                                                                     * Relay Block
+                                                                     * A simple rule that fires an event when it receives an event. Useful if a few wires should trigger the same bunch of wires.
+                                                                     * Progress Counter Block
+                                                                     * Based on the classical Counter Rule Block, but with extra features to trigger next output and additional actions every time the count is modified.
+                                                                     * Stand Node
+                                                                     * This node can be used to make an NPC stand still while otherwise idle. The NPC will not fidget or move around.
+                                                                     * Wander Node
+                                                                     * This node can be used to make an NPC move around randomly while otherwise idle, but without going too far away from the node’s position
+                                                                     * Rove Node
+                                                                     * This node can be used to make an NPC move around the environment randomly while otherwise idle.
+
+
+
+
+
+
+Props
+
+
+                                                                     * Two Handed Sword
+                                                                     * Heavy weapon that pushes enemies back. Can be swung multiple times in a combo. Takes up primary inventory slot.
+
+
+                                                                     * One Handed Sword
+                                                                     * Agile and light. Can be swung multiple times in a combo. Takes up primary inventory slot.
+
+
+                                                                     * 2H Ranged
+                                                                     * A ranged weapon, can be aimed for more precise shooting. Takes up primary inventory slot.
+
+
+                                                                     * 1H Ranged
+                                                                     * An equipable ranged projectile weapon. Takes up primary inventory slot
+
+
+                                                                     * Grenade
+                                                                     * Pickable item.
+
+
+                                                                     * Resource
+                                                                     * Pick up coins
+
+
+                                                                     * Treasure
+                                                                     * Treasure can be held and dropped, and occupy an ability slot.
+
+
+                                                                     * Pressure Plate
+                                                                     * When you step on the plate it triggers a connected event
+
+
+                                                                     * Lever
+                                                                     * Interacting with the lever will trigger connected events.
+
+
+                                                                     * Physics Cube
+                                                                     * A cube that you can push and pull during gameplay.
+
+
+                                                                     * Key
+                                                                     * Pickable item that opens wooden doors
+
+
+                                                                     * Jetpack
+                                                                     * Pickable item for easier vertical movement and to overcome taller obstacles.
+
+
+
+
+                                                                     * Anachronist Bounce Pad
+                                                                     * A bounce pad that launches you up in the air.
+
+
+
+
+                                                                     * Mechanical Spike Trap
+                                                                     * A spike trap that triggers once conditions are met (or when another even triggers it, like pulling a lever)
+
+
+                                                                     * Sensor Spike Trap
+                                                                     * A spike trap that triggers when you approach it. Does not require an event to trigger it.
+
+
+
+
+                                                                     * Mechanical Arrow Trap
+                                                                     * An arrow trap that triggers once conditions are met (or when another even triggers it, like pulling a lever)
+
+
+                                                                     * Sensor Arrow Trap
+                                                                     * An arrow trap that triggers when you approach it. Does not require an event to trigger it.
+
+
+
+
+                                                                     * Sentry Turret
+                                                                     * A turret that tracks and fires at NPCs or the player. Can be destroyed, set allegiances, be wired to, activated and deactivated. 
+
+
+
+
+                                                                     * Door - Trapdoor (Large)
+                                                                     * A trapdoor that opens a pathway on the floor.
+
+
+                                                                     * Door - Trapdoor (Small)
+                                                                     * A trapdoor that opens a pathway on the floor, but smaller.
+
+
+                                                                     * Healing Fountain
+                                                                     * Will heal players within radius of the fountain.
+
+
+                                                                     * Healing Injector
+                                                                     * Pickable item that heals players for a specific health amount once activated. The injector removes from inventory once used. Can be stacked in inventory.
+
+
+                                                                     * Instant Health Pickup
+                                                                     * Pick this up to get a small health boost. Does not have to be picked up, just run though it.
+
+
+
+
+                                                                     * Door - Locked (large)
+                                                                     * Large wooden door that can be set to unlocked or locked. Requires a key to open if locked.
+
+
+                                                                     * Door - Locked (Small).
+                                                                     * Small wooden door that can be set to unlocked or locked. Requires a key to open if locked.
+
+
+                                                                     * Door - Mechanical
+                                                                     * Mechanical door that opens on wired triggers.
+
+
+
+
+                                                                     * Anachronist Billboard
+                                                                     * A billboard that displays text. Can be wired to other props to change text during gameplay.
+
+
+
+
+                                                                     * Anachronist Floor Sign
+                                                                     * A sign board where you can set the text using the inspect tool.
